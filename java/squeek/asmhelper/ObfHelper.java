@@ -1,14 +1,42 @@
 package squeek.asmhelper;
 
+import java.io.IOException;
 import java.util.HashMap;
+import net.minecraft.launchwrapper.LaunchClassLoader;
 import cpw.mods.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
 
 public class ObfHelper
 {
-	// initialized in AppleCore.injectData
-	public static boolean obfuscated = false;
+	private static Boolean obfuscated = null;
 	private static HashMap<String, String> classNameToObfClassNameCache = new HashMap<String, String>();
 	private static HashMap<String, String> obfClassNameToClassNameCache = new HashMap<String, String>();
+
+	/**
+	 * can be initialized by a core mod in injectData by 
+	 * using the value of "runtimeDeobfuscationEnabled" to
+	 * avoid the class loader lookup in isObfuscated
+	 */
+	public static void setObfuscated(boolean obfuscated)
+	{
+		ObfHelper.obfuscated = obfuscated;
+	}
+
+	public static boolean isObfuscated()
+	{
+		if (obfuscated == null)
+		{
+			try
+			{
+				byte[] bytes = ((LaunchClassLoader) ObfHelper.class.getClassLoader()).getClassBytes("net.minecraft.world.World");
+				ObfHelper.setObfuscated(bytes == null);
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		return obfuscated;
+	}
 
 	private static void cacheObfClassMapping(String obfClassName, String className)
 	{
@@ -18,7 +46,7 @@ public class ObfHelper
 
 	public static String toDeobfClassName(String obfClassName)
 	{
-		if (obfuscated)
+		if (isObfuscated())
 		{
 			if (!obfClassNameToClassNameCache.containsKey(obfClassName))
 				cacheObfClassMapping(obfClassName, FMLDeobfuscatingRemapper.INSTANCE.map(obfClassName.replace('.', '/')).replace('/', '.'));
@@ -31,7 +59,7 @@ public class ObfHelper
 
 	public static String toObfClassName(String deobfClassName)
 	{
-		if (obfuscated)
+		if (isObfuscated())
 		{
 			if (!classNameToObfClassNameCache.containsKey(deobfClassName))
 				cacheObfClassMapping(FMLDeobfuscatingRemapper.INSTANCE.unmap(deobfClassName.replace('.', '/')).replace('/', '.'), deobfClassName);
