@@ -17,7 +17,6 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.util.Printer;
 import org.objectweb.asm.util.Textifier;
 import org.objectweb.asm.util.TraceMethodVisitor;
-import cpw.mods.fml.common.FMLCommonHandler;
 
 public class ASMHelper
 {
