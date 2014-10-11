@@ -1,9 +1,11 @@
 package squeek.asmhelper;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -26,8 +28,15 @@ public class ASMHelper
 	{
 		if (ASMHelper.isCauldron == null)
 		{
-			String modName = FMLCommonHandler.instance().getModName();
-			ASMHelper.isCauldron = modName.contains("cauldron") || modName.contains("mcpc");
+			try
+			{
+				byte[] bytes = ((LaunchClassLoader) ASMHelper.class.getClassLoader()).getClassBytes("net.minecraftforge.cauldron.api.Cauldron");
+				ASMHelper.isCauldron = bytes != null;
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
 		}
 
 		return ASMHelper.isCauldron;
