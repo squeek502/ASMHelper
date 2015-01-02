@@ -22,7 +22,7 @@ public class ObfRemappingClassWriter extends ClassWriter
 		}
 		catch (Exception e)
 		{
-			throw new RuntimeException(e.toString());
+			throw new RuntimeException(e);
 		}
 		if (c.isAssignableFrom(d))
 		{
