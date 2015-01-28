@@ -77,7 +77,7 @@ public class ASMHelper
 
 	public static AbstractInsnNode getOrFindInstructionOfType(AbstractInsnNode firstInsnToCheck, int type)
 	{
-		return getOrFindInstructionWithOpcode(firstInsnToCheck, type, false);
+		return getOrFindInstructionOfType(firstInsnToCheck, type, false);
 	}
 
 	public static AbstractInsnNode getOrFindInstructionOfType(AbstractInsnNode firstInsnToCheck, int type, boolean reverseDirection)
