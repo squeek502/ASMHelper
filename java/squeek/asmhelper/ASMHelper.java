@@ -232,30 +232,57 @@ public class ASMHelper
 
 	public static boolean patternMatches(InsnList checkFor, AbstractInsnNode checkAgainst)
 	{
-		for (AbstractInsnNode instruction = checkFor.getFirst(); instruction != null;)
+		return checkForPatternAt(checkFor, checkAgainst).getFirst() != null;
+	}
+
+	public static InsnList checkForPatternAt(InsnList checkFor, AbstractInsnNode checkAgainst)
+	{
+		InsnList foundInsnList = new InsnList();
+		boolean firstNeedleFound = false;
+		for (AbstractInsnNode lookFor = checkFor.getFirst(); lookFor != null;)
 		{
 			if (checkAgainst == null)
-				return false;
+				return new InsnList();
 
-			if (isLabelOrLineNumber(instruction))
+			if (isLabelOrLineNumber(lookFor))
 			{
-				instruction = instruction.getNext();
+				lookFor = lookFor.getNext();
 				continue;
 			}
 
 			if (isLabelOrLineNumber(checkAgainst))
 			{
+				if (firstNeedleFound)
+					foundInsnList.add(checkAgainst);
 				checkAgainst = checkAgainst.getNext();
 				continue;
 			}
 
-			if (!instructionsMatch(instruction, checkAgainst))
-				return false;
+			if (!instructionsMatch(lookFor, checkAgainst))
+				return new InsnList();
 
-			instruction = instruction.getNext();
+			foundInsnList.add(checkAgainst);
+			lookFor = lookFor.getNext();
 			checkAgainst = checkAgainst.getNext();
+			firstNeedleFound = true;
 		}
-		return true;
+		return foundInsnList;
+	}
+
+	public static InsnList findAndGetFoundInsnList(AbstractInsnNode haystackStart, InsnList needle)
+	{
+		int needleStartOpcode = needle.getFirst().getOpcode();
+		AbstractInsnNode checkAgainstStart = getOrFindInstructionWithOpcode(haystackStart, needleStartOpcode);
+		while (checkAgainstStart != null)
+		{
+			InsnList found = checkForPatternAt(needle, checkAgainstStart);
+
+			if (found.getFirst() != null)
+				return found;
+
+			checkAgainstStart = findNextInstructionWithOpcode(checkAgainstStart, needleStartOpcode);
+		}
+		return new InsnList();
 	}
 
 	public static AbstractInsnNode find(InsnList haystack, InsnList needle)
@@ -268,16 +295,8 @@ public class ASMHelper
 		if (needle.getFirst() == null)
 			return null;
 
-		int needleStartOpcode = needle.getFirst().getOpcode();
-		AbstractInsnNode checkAgainstStart = getOrFindInstructionWithOpcode(haystackStart, needleStartOpcode);
-		while (checkAgainstStart != null)
-		{
-			if (patternMatches(needle, checkAgainstStart))
-				return checkAgainstStart;
-
-			checkAgainstStart = findNextInstructionWithOpcode(checkAgainstStart, needleStartOpcode);
-		}
-		return null;
+		InsnList found = findAndGetFoundInsnList(haystackStart, needle);
+		return found.getFirst();
 	}
 
 	public static AbstractInsnNode find(InsnList haystack, AbstractInsnNode needle)
@@ -299,12 +318,12 @@ public class ASMHelper
 
 	public static AbstractInsnNode findAndReplace(InsnList haystack, InsnList needle, InsnList replacement, AbstractInsnNode haystackStart)
 	{
-		AbstractInsnNode foundStart = find(haystackStart, needle);
-		if (foundStart != null)
+		InsnList found = findAndGetFoundInsnList(haystackStart, needle);
+		if (found.size() > 0)
 		{
-			haystack.insertBefore(foundStart, cloneInsnList(replacement));
-			AbstractInsnNode afterNeedle = move(foundStart, needle.size());
-			removeFromInsnListUntil(haystack, foundStart, afterNeedle);
+			haystack.insertBefore(found.getFirst(), cloneInsnList(replacement));
+			AbstractInsnNode afterNeedle = found.getLast().getNext();
+			removeFromInsnListUntil(haystack, found.getFirst(), afterNeedle);
 			return afterNeedle;
 		}
 		return null;

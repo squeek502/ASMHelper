@@ -174,6 +174,31 @@ public class TestASMHelper
 		assertEquals(0, numReplaced);
 	}
 
+	@Test
+	public void findAndReplaceHandlesLabelsCorrectly()
+	{
+		InsnList needle = new InsnList();
+		InsnList haystack = new InsnList();
+		InsnList replacement = new InsnList();
+
+		needle.add(new VarInsnNode(ALOAD, InsnComparator.INT_WILDCARD));
+		needle.add(new FieldInsnNode(GETFIELD, InsnComparator.WILDCARD, InsnComparator.WILDCARD, InsnComparator.WILDCARD));
+
+		haystack.add(new LabelNode());
+		haystack.add(new LineNumberNode(1, new LabelNode()));
+		haystack.add(new VarInsnNode(ALOAD, 0));
+		haystack.add(new LabelNode());
+		haystack.add(new LineNumberNode(1, new LabelNode()));
+		haystack.add(new LabelNode());
+		haystack.add(new FieldInsnNode(GETFIELD, "dummy", "dummy", "dummy"));
+		haystack.add(new LabelNode());
+
+		// the labels/line numbers before and after the needle stay, but the labels/line numbers
+		// inside the needle are included in the replacement
+		ASMHelper.findAndReplace(haystack, needle, replacement);
+		assertEquals(3, haystack.size());
+	}
+
 	public InsnList populateTestHaystack(InsnList haystack)
 	{
 		haystack.clear();
@@ -244,7 +269,7 @@ public class TestASMHelper
 		haystack.add(new InsnNode(RETURN));
 		LabelNode l6 = new LabelNode();
 		haystack.add(l6);
-		
+
 		return haystack;
 	}
 
