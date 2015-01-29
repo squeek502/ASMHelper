@@ -319,9 +319,9 @@ public class ASMHelper
 	public static AbstractInsnNode findAndReplace(InsnList haystack, InsnList needle, InsnList replacement, AbstractInsnNode haystackStart)
 	{
 		InsnList found = findAndGetFoundInsnList(haystackStart, needle);
-		if (found.size() > 0)
+		if (found.getFirst() != null)
 		{
-			haystack.insertBefore(found.getFirst(), cloneInsnList(replacement));
+			haystack.insertBefore(found.getFirst(), replacement);
 			AbstractInsnNode afterNeedle = found.getLast().getNext();
 			removeFromInsnListUntil(haystack, found.getFirst(), afterNeedle);
 			return afterNeedle;
