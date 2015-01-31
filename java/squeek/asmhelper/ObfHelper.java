@@ -89,6 +89,7 @@ public class ObfHelper
 
 	/**
 	 * Converts a class name to an internal class name, obfuscating the class name if {@link #isObfuscated()}.
+	 * @return internal/class/name
 	 */
 	public static String getInternalClassName(String className)
 	{
@@ -97,6 +98,7 @@ public class ObfHelper
 
 	/**
 	 * Converts a class name to a descriptor, obfuscating the class name if {@link #isObfuscated()}.
+	 * @return Linternal/class/name;
 	 */
 	public static String getDescriptor(String className)
 	{
