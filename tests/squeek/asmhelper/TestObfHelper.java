@@ -79,5 +79,6 @@ public class TestObfHelper
 
 		ObfHelper.setObfuscated(true);
 		assertEquals(obfMethodDesc, ObfHelper.methodDesc(deobfMethodDesc));
+		assertEquals(obfMethodDesc, ObfHelper.methodDesc(obfMethodDesc));
 	}
 }

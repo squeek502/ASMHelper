@@ -74,7 +74,13 @@ public class ObfHelper
 	public static String forceToDeobfClassName(String obfClassName)
 	{
 		if (!obfClassNameToClassNameCache.containsKey(obfClassName))
-			cacheObfClassMapping(obfClassName, FMLDeobfuscatingRemapper.INSTANCE.map(obfClassName.replace('.', '/')).replace('/', '.'));
+		{
+			String mapped = FMLDeobfuscatingRemapper.INSTANCE.map(obfClassName.replace('.', '/')).replace('/', '.');
+			if (!mapped.equals(obfClassName))
+				cacheObfClassMapping(mapped, obfClassName);
+			else
+				return obfClassName;
+		}
 
 		return obfClassNameToClassNameCache.get(obfClassName);
 	}
@@ -96,7 +102,13 @@ public class ObfHelper
 	public static String forceToObfClassName(String deobfClassName)
 	{
 		if (!classNameToObfClassNameCache.containsKey(deobfClassName))
-			cacheObfClassMapping(FMLDeobfuscatingRemapper.INSTANCE.unmap(deobfClassName.replace('.', '/')).replace('/', '.'), deobfClassName);
+		{
+			String unmapped = FMLDeobfuscatingRemapper.INSTANCE.unmap(deobfClassName.replace('.', '/')).replace('/', '.');
+			if (!unmapped.equals(deobfClassName))
+				cacheObfClassMapping(unmapped, deobfClassName);
+			else
+				return deobfClassName;
+		}
 
 		return classNameToObfClassNameCache.get(deobfClassName);
 	}
