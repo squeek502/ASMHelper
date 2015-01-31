@@ -2,6 +2,8 @@ package squeek.asmhelper;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import cpw.mods.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
 
@@ -115,5 +117,26 @@ public class ObfHelper
 	public static String getDescriptor(String className)
 	{
 		return "L" + getInternalClassName(className) + ";";
+	}
+
+	/**
+	 * Processes a method descriptor, obfuscating class names if {@link #isObfuscated()}.
+	 */
+	public static String methodDesc(String deobfDesc)
+	{
+		if (isObfuscated())
+		{
+			// for each internal name, replace with the obfuscated version
+			Matcher classNameMatcher = Pattern.compile("L([^;]+);").matcher(deobfDesc);
+			StringBuffer obfDescBuffer = new StringBuffer(deobfDesc.length());
+			while (classNameMatcher.find())
+			{
+				classNameMatcher.appendReplacement(obfDescBuffer, getDescriptor(classNameMatcher.group(1).replace('/', '.')));
+			}
+			classNameMatcher.appendTail(obfDescBuffer);
+			return obfDescBuffer.toString();
+		}
+		else
+			return deobfDesc;
 	}
 }

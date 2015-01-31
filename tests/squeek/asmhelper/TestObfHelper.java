@@ -67,4 +67,17 @@ public class TestObfHelper
 		ObfHelper.setObfuscated(true);
 		assertEquals(obfInternalClassName, ObfHelper.getInternalClassName(deobfClassName));
 	}
+
+	@Test
+	public void testMethodDesc()
+	{
+		String deobfMethodDesc = "(I" + deobfDescriptor + "II" + deobfDescriptor + "Z)" + deobfDescriptor;
+		String obfMethodDesc = "(I" + obfDescriptor + "II" + obfDescriptor + "Z)" + obfDescriptor;
+
+		ObfHelper.setObfuscated(false);
+		assertEquals(deobfMethodDesc, ObfHelper.methodDesc(deobfMethodDesc));
+
+		ObfHelper.setObfuscated(true);
+		assertEquals(obfMethodDesc, ObfHelper.methodDesc(deobfMethodDesc));
+	}
 }
