@@ -61,14 +61,20 @@ public class ObfHelper
 	public static String toDeobfClassName(String obfClassName)
 	{
 		if (isObfuscated())
-		{
-			if (!obfClassNameToClassNameCache.containsKey(obfClassName))
-				cacheObfClassMapping(obfClassName, FMLDeobfuscatingRemapper.INSTANCE.map(obfClassName.replace('.', '/')).replace('/', '.'));
-
-			return obfClassNameToClassNameCache.get(obfClassName);
-		}
+			return forceToDeobfClassName(obfClassName);
 		else
 			return obfClassName;
+	}
+
+	/**
+	 * Deobfuscates an obfuscated class name regardless of {@link #isObfuscated()}.
+	 */
+	public static String forceToDeobfClassName(String obfClassName)
+	{
+		if (!obfClassNameToClassNameCache.containsKey(obfClassName))
+			cacheObfClassMapping(obfClassName, FMLDeobfuscatingRemapper.INSTANCE.map(obfClassName.replace('.', '/')).replace('/', '.'));
+
+		return obfClassNameToClassNameCache.get(obfClassName);
 	}
 
 	/**
@@ -77,14 +83,20 @@ public class ObfHelper
 	public static String toObfClassName(String deobfClassName)
 	{
 		if (isObfuscated())
-		{
-			if (!classNameToObfClassNameCache.containsKey(deobfClassName))
-				cacheObfClassMapping(FMLDeobfuscatingRemapper.INSTANCE.unmap(deobfClassName.replace('.', '/')).replace('/', '.'), deobfClassName);
-
-			return classNameToObfClassNameCache.get(deobfClassName);
-		}
+			return forceToObfClassName(deobfClassName);
 		else
 			return deobfClassName;
+	}
+
+	/**
+	 * Obfuscates a deobfuscated class name regardless of {@link #isObfuscated()}.
+	 */
+	public static String forceToObfClassName(String deobfClassName)
+	{
+		if (!classNameToObfClassNameCache.containsKey(deobfClassName))
+			cacheObfClassMapping(FMLDeobfuscatingRemapper.INSTANCE.unmap(deobfClassName.replace('.', '/')).replace('/', '.'), deobfClassName);
+
+		return classNameToObfClassNameCache.get(deobfClassName);
 	}
 
 	/**

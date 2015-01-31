@@ -25,6 +25,30 @@ public class TestObfHelper
 	public static final String obfDescriptor = "L" + obfInternalClassName + ";";
 
 	@Test
+	public void testConditionalObfAndDeobf()
+	{
+		ObfHelper.setObfuscated(false);
+		assertEquals(deobfClassName, ObfHelper.toObfClassName(deobfClassName));
+		assertEquals(obfClassName, ObfHelper.toDeobfClassName(obfClassName));
+
+		ObfHelper.setObfuscated(true);
+		assertEquals(obfClassName, ObfHelper.toObfClassName(deobfClassName));
+		assertEquals(deobfClassName, ObfHelper.toDeobfClassName(obfClassName));
+	}
+
+	@Test
+	public void testForceObfAndDeobf()
+	{
+		ObfHelper.setObfuscated(false);
+		assertEquals(obfClassName, ObfHelper.forceToObfClassName(deobfClassName));
+		assertEquals(deobfClassName, ObfHelper.forceToDeobfClassName(obfClassName));
+
+		ObfHelper.setObfuscated(true);
+		assertEquals(obfClassName, ObfHelper.forceToObfClassName(deobfClassName));
+		assertEquals(deobfClassName, ObfHelper.forceToDeobfClassName(obfClassName));
+	}
+
+	@Test
 	public void testDescriptor()
 	{
 		ObfHelper.setObfuscated(false);
