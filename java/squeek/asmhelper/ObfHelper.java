@@ -132,9 +132,9 @@ public class ObfHelper
 	}
 
 	/**
-	 * Processes a method descriptor, obfuscating class names if {@link #isObfuscated()}.
+	 * Processes a descriptor, obfuscating class names if {@link #isObfuscated()}.
 	 */
-	public static String methodDesc(String deobfDesc)
+	public static String desc(String deobfDesc)
 	{
 		if (isObfuscated())
 		{

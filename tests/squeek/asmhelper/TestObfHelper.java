@@ -69,16 +69,32 @@ public class TestObfHelper
 	}
 
 	@Test
-	public void testMethodDesc()
+	public void testDesc()
 	{
+		// primitive
+		ObfHelper.setObfuscated(false);
+		assertEquals("I", ObfHelper.desc("I"));
+
+		ObfHelper.setObfuscated(true);
+		assertEquals("I", ObfHelper.desc("I"));
+
+		// field
+		ObfHelper.setObfuscated(false);
+		assertEquals(deobfDescriptor, ObfHelper.desc(deobfDescriptor));
+
+		ObfHelper.setObfuscated(true);
+		assertEquals(obfDescriptor, ObfHelper.desc(deobfDescriptor));
+		assertEquals(obfDescriptor, ObfHelper.desc(obfDescriptor));
+
+		// method
 		String deobfMethodDesc = "(I" + deobfDescriptor + "II" + deobfDescriptor + "Z)" + deobfDescriptor;
 		String obfMethodDesc = "(I" + obfDescriptor + "II" + obfDescriptor + "Z)" + obfDescriptor;
 
 		ObfHelper.setObfuscated(false);
-		assertEquals(deobfMethodDesc, ObfHelper.methodDesc(deobfMethodDesc));
+		assertEquals(deobfMethodDesc, ObfHelper.desc(deobfMethodDesc));
 
 		ObfHelper.setObfuscated(true);
-		assertEquals(obfMethodDesc, ObfHelper.methodDesc(deobfMethodDesc));
-		assertEquals(obfMethodDesc, ObfHelper.methodDesc(obfMethodDesc));
+		assertEquals(obfMethodDesc, ObfHelper.desc(deobfMethodDesc));
+		assertEquals(obfMethodDesc, ObfHelper.desc(obfMethodDesc));
 	}
 }
