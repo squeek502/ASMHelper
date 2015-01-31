@@ -12,15 +12,26 @@ public class ObfHelper
 	private static HashMap<String, String> obfClassNameToClassNameCache = new HashMap<String, String>();
 
 	/**
-	 * can be initialized by a core mod in injectData by 
+	 * Can be initialized by a core mod in {@link cpw.mods.fml.relauncher.IFMLLoadingPlugin#injectData} by 
 	 * using the value of "runtimeDeobfuscationEnabled" to
-	 * avoid the class loader lookup in isObfuscated
+	 * avoid the class loader lookup in isObfuscated.<br>
+	 * <br>
+	 * <b>Example:</b>
+	 * <pre>
+	 * public void injectData(Map<String, Object> data)
+	 * {
+	 *     ObfHelper.setObfuscated((Boolean) data.get("runtimeDeobfuscationEnabled"));
+	 * }
+	 * </pre>
 	 */
 	public static void setObfuscated(boolean obfuscated)
 	{
 		ObfHelper.obfuscated = obfuscated;
 	}
 
+	/**
+	 * @return Whether or not the current environment contains obfuscated Minecraft code
+	 */
 	public static boolean isObfuscated()
 	{
 		if (obfuscated == null)
@@ -44,6 +55,9 @@ public class ObfHelper
 		classNameToObfClassNameCache.put(className, obfClassName);
 	}
 
+	/**
+	 * Deobfuscates an obfuscated class name if {@link #isObfuscated()}.
+	 */
 	public static String toDeobfClassName(String obfClassName)
 	{
 		if (isObfuscated())
@@ -57,6 +71,9 @@ public class ObfHelper
 			return obfClassName;
 	}
 
+	/**
+	 * Obfuscates a deobfuscated class name if {@link #isObfuscated()}.
+	 */
 	public static String toObfClassName(String deobfClassName)
 	{
 		if (isObfuscated())
@@ -70,11 +87,17 @@ public class ObfHelper
 			return deobfClassName;
 	}
 
+	/**
+	 * Converts a class name to an internal class name, obfuscating the class name if {@link #isObfuscated()}.
+	 */
 	public static String getInternalClassName(String className)
 	{
 		return toObfClassName(className).replace('.', '/');
 	}
 
+	/**
+	 * Converts a class name to a descriptor, obfuscating the class name if {@link #isObfuscated()}.
+	 */
 	public static String getDescriptor(String className)
 	{
 		return "L" + getInternalClassName(className) + ";";

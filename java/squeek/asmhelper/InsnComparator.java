@@ -21,6 +21,12 @@ public class InsnComparator implements Comparator<AbstractInsnNode>
 		return areInsnsEqual(a, b) ? 0 : 1;
 	}
 
+	/**
+	 * Respects {@link #INT_WILDCARD} and {@link WILDCARD} instruction properties.
+	 * Always returns true if {@link a} and {@link b} are label, line number, or frame instructions.
+	 * 
+	 * @return Whether or not the given instructions are equivalent.
+	 */
 	public boolean areInsnsEqual(AbstractInsnNode a, AbstractInsnNode b)
 	{
 		if (a.equals(b))

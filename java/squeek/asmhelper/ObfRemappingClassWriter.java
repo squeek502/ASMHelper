@@ -2,7 +2,10 @@ package squeek.asmhelper;
 
 import org.objectweb.asm.ClassWriter;
 
-// getCommonSuperClass needs to be overwritten to avoid ClassNotFoundExceptions in obfuscated environments
+/**
+ * {@link ClassWriter#getCommonSuperClass} needed to be overwritten 
+ * in order to avoid ClassNotFoundExceptions in obfuscated environments.
+ */
 public class ObfRemappingClassWriter extends ClassWriter
 {
 	public ObfRemappingClassWriter(int flags)
