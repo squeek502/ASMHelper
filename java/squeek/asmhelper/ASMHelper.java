@@ -1,9 +1,12 @@
 package squeek.asmhelper;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.objectweb.asm.ClassReader;
@@ -90,6 +93,74 @@ public class ASMHelper
 		ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 		classNode.accept(writer);
 		return writer.toByteArray();
+	}
+
+	/**
+	 * @return An InputStream instance for the specified class name loaded by the specified ClassLoader.
+	 */
+	public static InputStream getClassAsStreamFromClassLoader(String className, ClassLoader classLoader)
+	{
+		return classLoader.getResourceAsStream(className.replace('.', '/') + ".class");
+	}
+
+	/**
+	 * @return A ClassReader instance for the specified class name.
+	 */
+	public static ClassReader getClassReaderForClassName(String className) throws IOException
+	{
+		return new ClassReader(getClassAsStreamFromClassLoader(className, ASMHelper.class.getClassLoader()));
+	}
+
+	/**
+	 * @return Whether or not the class read by the ClassReader has a valid super class.
+	 */
+	public static boolean classHasSuper(ClassReader classReader)
+	{
+		return classReader.getSuperName() != null && !classReader.getSuperName().equals("java/lang/Object");
+	}
+
+	/**
+	 * @return Whether or not the class read by the ClassReader implements the specified interface.
+	 */
+	public static boolean doesClassImplement(ClassReader classReader, String targetInterfaceInternalClassName)
+	{
+		List<String> immediateInterfaces = Arrays.asList(classReader.getInterfaces());
+		if (immediateInterfaces.contains(targetInterfaceInternalClassName))
+			return true;
+
+		try
+		{
+			if (classHasSuper(classReader))
+				return doesClassImplement(getClassReaderForClassName(classReader.getSuperName()), targetInterfaceInternalClassName);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	/**
+	 * @return Whether or not the class read by the ClassReader extends the specified class.
+	 */
+	public static boolean doesClassExtend(ClassReader classReader, String targetSuperInternalClassName)
+	{
+		if (!classHasSuper(classReader))
+			return false;
+
+		String immediateSuperName = classReader.getSuperName();
+		if (immediateSuperName.equals(targetSuperInternalClassName))
+			return true;
+
+		try
+		{
+			return doesClassExtend(getClassReaderForClassName(immediateSuperName), targetSuperInternalClassName);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	/**
