@@ -64,8 +64,8 @@ if (rootProject != project)
 
 	rootProject.sourceSets.main.java.srcDirs += destDirPath
 	rootProject.tasks.sourceMainJava.dependsOn(generateProjectSpecificPackage)
-	rootProject.tasks.eclipse.dependsOn(generateProjectSpecificPackage)
-	rootProject.tasks.idea.dependsOn(generateProjectSpecificPackage)
+	rootProject.tasks.eclipseClasspath.dependsOn(generateProjectSpecificPackage)
+	rootProject.tasks.ideaModule.dependsOn(generateProjectSpecificPackage)
 }
 else
 {
