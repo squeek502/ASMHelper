@@ -1,0 +1,52 @@
+group = "squeek.asmhelper"
+
+if (rootProject != project)
+{
+	def generator = { String alphabet, int n ->
+		new Random().with {
+			(1..n).collect { alphabet[ nextInt( alphabet.length() ) ] }.join()
+		}
+	}
+	def pkgToPath = { String pkg -> pkg.tokenize('.').join('/') }
+	def pathToPkg = { String path -> path.tokenize('/').join('.') }
+
+	def rawJavaDir = "raw"
+	def finalJavaDir = "gen"
+	def appendedGroup = rootProject.group != null && !rootProject.group.isEmpty() ? rootProject.group : generator( ('a'..'z').join(), 9 )
+	def srcDirPath = project.projectDir.getPath() + "/" + rawJavaDir
+	def destDirPath = project.projectDir.getPath() + "/" + finalJavaDir
+	def asmhelperPackage = project.group
+	def asmhelperPath = pkgToPath(asmhelperPackage)
+
+	task generateProjectSpecificPackage() << {
+		def searchDir = file(srcDirPath)
+		def rootDestDir = file(destDirPath)
+
+		// clean
+		if (rootDestDir.exists())
+			rootDestDir.deleteDir()
+
+		def destDir = file(rootDestDir.getPath() + "/" + asmhelperPath + "/" + pkgToPath(appendedGroup))
+		def srcTree = fileTree(dir: searchDir, include: '**/*.java')
+		def filesToDelete = []
+		def filesToAdd = []
+		srcTree.each { file -> 
+			def updatedContent = file.getText('UTF-8')
+			updatedContent = updatedContent.replaceAll("package " + asmhelperPackage, "package " + asmhelperPackage + "." + appendedGroup)
+			updatedContent = updatedContent.replaceAll("import " + asmhelperPackage, "import " + asmhelperPackage + "." + appendedGroup)
+			def updatedFile = new File(destDir, file.getName())
+			filesToAdd += [ file: updatedFile, content: updatedContent ]
+			logger.lifecycle("Processed " + file.getPath().replace(project.projectDir.getPath() + File.separator, "") + ", copying to " + updatedFile.getPath().replace(project.projectDir.getPath() + File.separator, ""))
+		}
+		filesToAdd.each { fileToAdd -> 
+			if (!fileToAdd.file.getParentFile().exists())
+				fileToAdd.file.getParentFile().mkdirs()
+			fileToAdd.file.write(fileToAdd.content, 'UTF-8')
+		}
+	}
+
+	rootProject.sourceSets.main.java.srcDirs += destDirPath
+	rootProject.tasks.sourceMainJava.dependsOn(generateProjectSpecificPackage)
+	rootProject.tasks.eclipse.dependsOn(generateProjectSpecificPackage)
+	rootProject.tasks.idea.dependsOn(generateProjectSpecificPackage)
+}

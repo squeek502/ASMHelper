@@ -1,3 +1,6 @@
+# ASMHelper specific
+gen/
+
 # Created by https://www.gitignore.io
 
 ### Java ###
