@@ -18,6 +18,8 @@ gen/
 hs_err_pid*
 
 
+# Created by https://www.gitignore.io
+
 ### Eclipse ###
 *.pydevproject
 .metadata
@@ -32,6 +34,9 @@ local.properties
 .settings/
 .loadpath
 
+# Eclipse Core
+.project
+
 # External tool builders
 .externalToolBuilders/
 
@@ -41,10 +46,13 @@ local.properties
 # CDT-specific
 .cproject
 
+# JDT-specific (Eclipse Java Development Tools)
+.classpath
+
 # PDT-specific
 .buildpath
 
-# sbteclipse plugin 
+# sbteclipse plugin
 .target
 
 # TeXlipse plugin
