@@ -125,17 +125,20 @@ public class ASMHelper
 	public static boolean doesClassImplement(ClassReader classReader, String targetInterfaceInternalClassName)
 	{
 		List<String> immediateInterfaces = Arrays.asList(classReader.getInterfaces());
-		if (immediateInterfaces.contains(targetInterfaceInternalClassName))
-			return true;
+		for (String immediateInterface : immediateInterfaces)
+		{
+			if (ObfHelper.getInternalClassName(immediateInterface).equals(targetInterfaceInternalClassName))
+				return true;
+		}
 
 		try
 		{
 			if (classHasSuper(classReader))
-				return doesClassImplement(getClassReaderForClassName(classReader.getSuperName()), targetInterfaceInternalClassName);
+				return doesClassImplement(getClassReaderForClassName(ObfHelper.getInternalClassName(classReader.getSuperName())), targetInterfaceInternalClassName);
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
+			throw new RuntimeException("raw = " + classReader.getSuperName() + ", obf = " + ObfHelper.getInternalClassName(classReader.getSuperName()), e);
 		}
 		return false;
 	}
@@ -148,7 +151,7 @@ public class ASMHelper
 		if (!classHasSuper(classReader))
 			return false;
 
-		String immediateSuperName = classReader.getSuperName();
+		String immediateSuperName = ObfHelper.getInternalClassName(classReader.getSuperName());
 		if (immediateSuperName.equals(targetSuperInternalClassName))
 			return true;
 
@@ -158,9 +161,8 @@ public class ASMHelper
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
+			throw new RuntimeException("raw = " + classReader.getSuperName() + ", obf = " + immediateSuperName, e);
 		}
-		return false;
 	}
 
 	/**
