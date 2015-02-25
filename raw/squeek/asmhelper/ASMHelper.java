@@ -69,7 +69,15 @@ public class ASMHelper
 	 */
 	public static byte[] writeClassToBytes(ClassNode classNode)
 	{
-		ClassWriter writer = new ObfRemappingClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+		return writeClassToBytes(classNode, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+	}
+
+	/**
+	 * Overload of {@link #writeClassToBytes(ClassNode)} with a flags parameter.
+	 */
+	public static byte[] writeClassToBytes(ClassNode classNode, int flags)
+	{
+		ClassWriter writer = new ObfRemappingClassWriter(flags);
 		classNode.accept(writer);
 		return writer.toByteArray();
 	}
