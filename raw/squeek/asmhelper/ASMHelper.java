@@ -11,9 +11,11 @@ import java.util.Map;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -389,7 +391,7 @@ public class ASMHelper
 	}
 
 	/**
-	 * Remove instructions from {@link insnList} starting with {@link startInvlusive} 
+	 * Remove instructions from {@link insnList} starting with {@link startInclusive} 
 	 * up until reaching {@link endNotInclusive} ({@link endNotInclusive} will not be removed).
 	 * 
 	 * @return The number of instructions removed
@@ -406,6 +408,24 @@ public class ASMHelper
 		}
 		return numDeleted;
 	}
+
+	/**
+	 * Note: This is an alternative to {@link #removeFromInsnListUntil(InsnList, AbstractInsnNode, AbstractInsnNode) removeFromInsnListUntil} and will achieve a similar result. <br>
+	 * <br>
+	 * 
+	 * Skip instructions from {@link insnList} starting with {@link startInclusive}
+	 * up until reaching {@link endNotInclusive} ({@link endNotInclusive} will not be skipped).
+	 *
+	 * This is achieved by inserting a GOTO instruction before {@link startInclusive} which is branched to a
+	 * LabelNode that is inserted before {@link endNotInclusive}.
+	 */
+	public static void skipInstructions(InsnList insnList, AbstractInsnNode startInclusive, AbstractInsnNode endNotInclusive)
+    	{
+        	LabelNode skipLabel = new LabelNode();
+        	JumpInsnNode gotoInsn = new JumpInsnNode(Opcodes.GOTO, skipLabel);
+        	insnList.insertBefore(startInclusive, gotoInsn);
+        	insnList.insertBefore(endNotInclusive, skipLabel);
+    	}
 
 	/**
 	 * Note: Does not move the instruction, but rather gets the instruction a certain
