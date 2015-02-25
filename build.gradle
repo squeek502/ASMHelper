@@ -33,24 +33,23 @@ if (rootProject != project)
 	def srcDirPath = project.projectDir.getPath() + "/" + rawJavaDir
 	def destDirPath = project.projectDir.getPath() + "/" + finalJavaDir
 	def asmhelperPackage = project.group
-	def asmhelperPath = pkgToPath(asmhelperPackage)
 
-	task generateProjectSpecificPackage() << {
-		def searchDir = file(srcDirPath)
-		def rootDestDir = file(destDirPath)
+	def moveAndAlterPackage = { String oldDir, String newDir, String oldPackage, String newPackage ->
+		def searchDir = file(oldDir)
+		def rootDestDir = file(newDir)
 
 		// clean
 		if (rootDestDir.exists())
 			rootDestDir.deleteDir()
 
-		def destDir = file(rootDestDir.getPath() + "/" + asmhelperPath + "/" + pkgToPath(appendedGroup))
+		def destDir = file(rootDestDir.getPath() + "/" + pkgToPath(newPackage))
 		def srcTree = fileTree(dir: searchDir, include: '**/*.java')
 		def filesToDelete = []
 		def filesToAdd = []
 		srcTree.each { file -> 
 			def updatedContent = file.getText('UTF-8')
-			updatedContent = updatedContent.replaceAll("package " + asmhelperPackage, "package " + asmhelperPackage + "." + appendedGroup)
-			updatedContent = updatedContent.replaceAll("import " + asmhelperPackage, "import " + asmhelperPackage + "." + appendedGroup)
+			updatedContent = updatedContent.replaceAll("package " + oldPackage, "package " + newPackage)
+			updatedContent = updatedContent.replaceAll("import " + oldPackage, "import " + newPackage)
 			def updatedFile = new File(destDir, file.getName())
 			filesToAdd += [ file: updatedFile, content: updatedContent ]
 			logger.lifecycle("Processed " + file.getPath().replace(project.projectDir.getPath() + File.separator, "") + ", copying to " + updatedFile.getPath().replace(project.projectDir.getPath() + File.separator, ""))
@@ -62,10 +61,18 @@ if (rootProject != project)
 		}
 	}
 
+	task generateProjectSpecificPackage() << {
+		moveAndAlterPackage(srcDirPath, destDirPath, asmhelperPackage, asmhelperPackage + "." + appendedGroup)
+	}
+
 	rootProject.sourceSets.main.java.srcDirs += destDirPath
 	rootProject.tasks.sourceMainJava.dependsOn(generateProjectSpecificPackage)
 	rootProject.tasks.eclipseClasspath.dependsOn(generateProjectSpecificPackage)
 	rootProject.tasks.ideaModule.dependsOn(generateProjectSpecificPackage)
+
+	task reincorporate() << {
+		moveAndAlterPackage(destDirPath, srcDirPath, asmhelperPackage + "." + appendedGroup, asmhelperPackage)
+	}
 }
 else
 {
