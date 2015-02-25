@@ -22,8 +22,8 @@ public class InsnComparator implements Comparator<AbstractInsnNode>
 	}
 
 	/**
-	 * Respects {@link #INT_WILDCARD} and {@link WILDCARD} instruction properties.
-	 * Always returns true if {@link a} and {@link b} are label, line number, or frame instructions.
+	 * Respects {@link #INT_WILDCARD} and {@link #WILDCARD} instruction properties.
+	 * Always returns true if {@code a} and {@code b} are label, line number, or frame instructions.
 	 * 
 	 * @return Whether or not the given instructions are equivalent.
 	 */
