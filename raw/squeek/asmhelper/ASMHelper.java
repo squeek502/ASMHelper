@@ -56,9 +56,17 @@ public class ASMHelper
 	 */
 	public static ClassNode readClassFromBytes(byte[] bytes)
 	{
+		return readClassFromBytes(bytes, 0);
+	}
+
+	/**
+	 * Overload of {@link #readClassFromBytes(byte[])} with a flags parameter.
+	 */
+	public static ClassNode readClassFromBytes(byte[] bytes, int flags)
+	{
 		ClassNode classNode = new ClassNode();
 		ClassReader classReader = new ClassReader(bytes);
-		classReader.accept(classNode, 0);
+		classReader.accept(classNode, flags);
 		return classNode;
 	}
 
