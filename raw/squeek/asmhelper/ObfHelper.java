@@ -4,14 +4,14 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.minecraft.launchwrapper.LaunchClassLoader;
-import cpw.mods.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
+import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
 
 public class ObfHelper
 {
 	private static Boolean obfuscated = null;
 
 	/**
-	 * Can be initialized by a core mod in {@link cpw.mods.fml.relauncher.IFMLLoadingPlugin#injectData} by 
+	 * Can be initialized by a core mod in {@link net.minecraftforge.fml.relauncher.IFMLLoadingPlugin#injectData} by
 	 * using the value of "runtimeDeobfuscationEnabled" to
 	 * avoid the class loader lookup in isObfuscated.<br>
 	 * <br>

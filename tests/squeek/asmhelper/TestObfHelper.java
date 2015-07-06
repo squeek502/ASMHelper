@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import java.net.URL;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.junit.Test;
-import cpw.mods.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
+import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
 
 public class TestObfHelper
 {
