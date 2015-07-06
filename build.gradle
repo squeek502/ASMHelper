@@ -79,7 +79,7 @@ else
 	apply plugin: 'forge'
 
 	minecraft {
-		version = "1.7.10-10.13.2.1291"
+		version = "1.8-11.14.3.1487"
 	}
 
 	sourceSets.main.java.srcDirs += 'raw'
