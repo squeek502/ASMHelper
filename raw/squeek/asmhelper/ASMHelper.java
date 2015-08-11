@@ -44,7 +44,7 @@ public class ASMHelper
 			}
 			catch (IOException e)
 			{
-				e.printStackTrace();
+				ASMHelper.isCauldron = false;
 			}
 		}
 

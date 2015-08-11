@@ -42,7 +42,7 @@ public class ObfHelper
 			}
 			catch (IOException e)
 			{
-				e.printStackTrace();
+				obfuscated = true;
 			}
 		}
 		return obfuscated;
