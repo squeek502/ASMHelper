@@ -52,6 +52,24 @@ public class ASMHelper
 	}
 
 	/**
+	 * Converts a class name to an internal class name.
+	 * @return internal/class/name
+	 */
+	public static String toInternalClassName(String className)
+	{
+		return className.replace('.', '/');
+	}
+
+	/**
+	 * Converts a class name to a descriptor.
+	 * @return Linternal/class/name;
+	 */
+	public static String toDescriptor(String className)
+	{
+		return "L" + toInternalClassName(className) + ";";
+	}
+
+	/**
 	 * Convert a byte array into a ClassNode.
 	 */
 	public static ClassNode readClassFromBytes(byte[] bytes)
