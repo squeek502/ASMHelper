@@ -156,7 +156,7 @@ public class ASMHelper
 		}
 		catch (IOException e)
 		{
-			throw new RuntimeException("raw = " + classReader.getSuperName() + ", obf = " + ObfHelper.getInternalClassName(classReader.getSuperName()), e);
+			// This will trigger when the super class is abstract; just ignore the error
 		}
 		return false;
 	}
@@ -179,8 +179,9 @@ public class ASMHelper
 		}
 		catch (IOException e)
 		{
-			throw new RuntimeException("raw = " + classReader.getSuperName() + ", obf = " + immediateSuperName, e);
+			// This will trigger when the super class is abstract; just ignore the error
 		}
+		return false;
 	}
 
 	/**
@@ -452,12 +453,12 @@ public class ASMHelper
 	 * LabelNode that is inserted before {@code endNotInclusive}.
 	 */
 	public static void skipInstructions(InsnList insnList, AbstractInsnNode startInclusive, AbstractInsnNode endNotInclusive)
-    	{
-        	LabelNode skipLabel = new LabelNode();
-        	JumpInsnNode gotoInsn = new JumpInsnNode(Opcodes.GOTO, skipLabel);
-        	insnList.insertBefore(startInclusive, gotoInsn);
-        	insnList.insertBefore(endNotInclusive, skipLabel);
-    	}
+	{
+		LabelNode skipLabel = new LabelNode();
+		JumpInsnNode gotoInsn = new JumpInsnNode(Opcodes.GOTO, skipLabel);
+		insnList.insertBefore(startInclusive, gotoInsn);
+		insnList.insertBefore(endNotInclusive, skipLabel);
+	}
 
 	/**
 	 * Note: Does not move the instruction, but rather gets the instruction a certain
