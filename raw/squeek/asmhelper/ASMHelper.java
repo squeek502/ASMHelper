@@ -391,6 +391,22 @@ public class ASMHelper
 	}
 
 	/**
+	 * @return The method of the class that has a matching {@code srgMethodName} or {@code mcpMethodName} and a matching {@code methodDesc}.
+	 * If no matching method is found, returns {@code null}.
+	 */
+	public static MethodNode findMethodNodeOfClass(ClassNode classNode, String srgMethodName, String mcpMethodName, String methodDesc)
+	{
+		for (MethodNode method : classNode.methods)
+		{
+			if ((method.name.equals(srgMethodName) || method.name.equals(mcpMethodName)) && (methodDesc == null || method.desc.equals(methodDesc)))
+			{
+				return method;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Useful for defining the end label for ASM-inserted local variables.
 	 * 
 	 * @return The last label of the method (usually after the RETURN instruction).
