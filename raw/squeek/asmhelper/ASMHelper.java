@@ -426,6 +426,15 @@ public class ASMHelper
 	}
 
 	/**
+	 * Adding instructions to abstract methods will cause a {@link java.lang.ClassFormatError}
+	 * @return Whether or not the {@code MethodNode} is abstract
+	 */
+	public static boolean isMethodAbstract(MethodNode method)
+	{
+		return (method.access & Opcodes.ACC_ABSTRACT) != 0;
+	}
+
+	/**
 	 * Useful for defining the end label for ASM-inserted local variables.
 	 * 
 	 * @return The last label of the method (usually after the RETURN instruction).
