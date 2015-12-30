@@ -1,5 +1,6 @@
 package squeek.asmhelper;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -10,10 +11,11 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
-public class InsnComparator implements Comparator<AbstractInsnNode>
+public class InsnComparator implements Comparator<AbstractInsnNode>, Serializable
 {
-	public static int INT_WILDCARD = -1;
-	public static String WILDCARD = "*";
+	private static final long serialVersionUID = 408241651446425342L;
+	public static final int INT_WILDCARD = -1;
+	public static final String WILDCARD = "*";
 
 	@Override
 	public int compare(AbstractInsnNode a, AbstractInsnNode b)
@@ -29,11 +31,14 @@ public class InsnComparator implements Comparator<AbstractInsnNode>
 	 */
 	public boolean areInsnsEqual(AbstractInsnNode a, AbstractInsnNode b)
 	{
-		if (a.equals(b))
+		if (a == b)
 			return true;
 
 		if (a == null || b == null)
 			return false;
+
+		if (a.equals(b))
+			return true;
 
 		if (a.getOpcode() != b.getOpcode())
 			return false;

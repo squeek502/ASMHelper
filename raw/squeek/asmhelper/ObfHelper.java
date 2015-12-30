@@ -9,6 +9,7 @@ import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRema
 public class ObfHelper
 {
 	private static Boolean obfuscated = null;
+	private static Boolean runsAfterDeobfRemapper = null;
 
 	/**
 	 * Can be initialized by a core mod in {@link net.minecraftforge.fml.relauncher.IFMLLoadingPlugin#injectData} by
@@ -29,6 +30,35 @@ public class ObfHelper
 	}
 
 	/**
+	 * Should be initialized to true by a core mod that uses SortingIndex > 1000
+	 * (e.g. in {@link cpw.mods.fml.relauncher.IFMLLoadingPlugin#injectData}).
+	 */
+	public static void setRunsAfterDeobfRemapper(boolean runsAfterDeobfRemapper)
+	{
+		ObfHelper.runsAfterDeobfRemapper = runsAfterDeobfRemapper;
+	}
+
+	/**
+	 * @return Whether or not the current environment has been deobfuscated by FML
+	 */
+	public static boolean runsAfterDeobfRemapper()
+	{
+		if (runsAfterDeobfRemapper == null)
+		{
+			try
+			{
+				byte[] bytes = ((LaunchClassLoader) ObfHelper.class.getClassLoader()).getClassBytes("net.minecraft.world.World");
+				ObfHelper.setRunsAfterDeobfRemapper(bytes != null);
+			}
+			catch (IOException e)
+			{
+				runsAfterDeobfRemapper = false;
+			}
+		}
+		return runsAfterDeobfRemapper;
+	}
+
+	/**
 	 * @return Whether or not the current environment contains obfuscated Minecraft code
 	 */
 	public static boolean isObfuscated()
@@ -42,7 +72,7 @@ public class ObfHelper
 			}
 			catch (IOException e)
 			{
-				e.printStackTrace();
+				obfuscated = true;
 			}
 		}
 		return obfuscated;
@@ -53,7 +83,7 @@ public class ObfHelper
 	 */
 	public static String toDeobfClassName(String obfClassName)
 	{
-		if (isObfuscated())
+		if (isObfuscated() && !runsAfterDeobfRemapper())
 			return forceToDeobfClassName(obfClassName);
 		else
 			return obfClassName;
@@ -72,7 +102,7 @@ public class ObfHelper
 	 */
 	public static String toObfClassName(String deobfClassName)
 	{
-		if (isObfuscated())
+		if (isObfuscated() && !runsAfterDeobfRemapper())
 			return forceToObfClassName(deobfClassName);
 		else
 			return deobfClassName;
