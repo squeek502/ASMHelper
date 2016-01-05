@@ -1,10 +1,11 @@
 package squeek.asmhelper;
 
+import net.minecraft.launchwrapper.LaunchClassLoader;
+import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
+
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.minecraft.launchwrapper.LaunchClassLoader;
-import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
 
 public class ObfHelper
 {
@@ -31,7 +32,7 @@ public class ObfHelper
 
 	/**
 	 * Should be initialized to true by a core mod that uses SortingIndex > 1000
-	 * (e.g. in {@link cpw.mods.fml.relauncher.IFMLLoadingPlugin#injectData}).
+	 * (e.g. in {@link net.minecraftforge.fml.relauncher.IFMLLoadingPlugin#injectData}).
 	 */
 	public static void setRunsAfterDeobfRemapper(boolean runsAfterDeobfRemapper)
 	{
