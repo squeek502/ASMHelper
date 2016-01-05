@@ -1,15 +1,11 @@
 package squeek.asmhelper;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.objectweb.asm.Opcodes.*;
 import org.junit.Test;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
-import squeek.asmhelper.ASMHelper;
-import squeek.asmhelper.InsnComparator;
+
+import static org.junit.Assert.*;
+import static org.objectweb.asm.Opcodes.*;
 
 public class TestASMHelper
 {

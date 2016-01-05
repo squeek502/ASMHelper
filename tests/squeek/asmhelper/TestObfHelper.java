@@ -1,14 +1,16 @@
 package squeek.asmhelper;
 
-import static org.junit.Assert.assertEquals;
-import java.net.URL;
 import net.minecraft.launchwrapper.LaunchClassLoader;
-import org.junit.Test;
 import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
+import org.junit.Test;
+
+import java.net.URL;
+
+import static org.junit.Assert.assertEquals;
 
 public class TestObfHelper
 {
-	public static final String MINECRAFT_VERSION = "1.7.10";
+	public static final String MINECRAFT_VERSION = "1.8.9";
 
 	private static final FMLDeobfuscatingRemapper remapper = FMLDeobfuscatingRemapper.INSTANCE;
 	static
