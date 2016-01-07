@@ -15,6 +15,13 @@ public class TestASMHelper
 {
 
 	@Test
+	public void toMethodDescriptor()
+	{
+		assertEquals("(Linternal/class/name;Lclass/descriptor;)Lclass/name;", ASMHelper.toMethodDescriptor("class.name", "internal/class/name", "Lclass/descriptor;"));
+		assertEquals("(FZ)V", ASMHelper.toMethodDescriptor("V", "F", "Z"));
+	}
+
+	@Test
 	public void instructionMatchingMustMatchExactly()
 	{
 		assertTrue(ASMHelper.instructionsMatch(new InsnNode(RETURN), new InsnNode(RETURN)));
