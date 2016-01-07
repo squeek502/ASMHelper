@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -56,12 +57,35 @@ public class ASMHelper
 	}
 
 	/**
+	 * @return true if the String is a valid descriptor;
+	 */
+	public static boolean isDescriptor(String descriptor)
+	{
+		return descriptor.length() == 1 || (descriptor.startsWith("L") && descriptor.endsWith(";"));
+	}
+
+	/**
 	 * Converts a class name to a descriptor.
 	 * @return Linternal/class/name;
 	 */
 	public static String toDescriptor(String className)
 	{
-		return "L" + toInternalClassName(className) + ";";
+		return isDescriptor(className) ? className : "L" + toInternalClassName(className) + ";";
+	}
+
+	/**
+	 * Turns the given return and parameter values into a method descriptor
+	 * Converts the types into descriptors as needed
+	 * @return (LparamType;)LreturnType;
+	 */
+	public static String toMethodDescriptor(String returnType, String... paramTypes)
+	{
+		List<String> paramDescriptors = new ArrayList<String>();
+		
+		for (String paramType : paramTypes)
+			paramDescriptors.add(toDescriptor(paramType));
+		
+		return "(" + String.join("", paramDescriptors) + ")" + toDescriptor(returnType);
 	}
 
 	/**
