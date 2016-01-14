@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -85,12 +84,11 @@ public class ASMHelper
 	 */
 	public static String toMethodDescriptor(String returnType, String... paramTypes)
 	{
-		List<String> paramDescriptors = new ArrayList<String>();
-		
+		StringBuilder paramDescriptors = new StringBuilder();
 		for (String paramType : paramTypes)
-			paramDescriptors.add(toDescriptor(paramType));
-		
-		return "(" + String.join("", paramDescriptors) + ")" + toDescriptor(returnType);
+			paramDescriptors.append(toDescriptor(paramType));
+
+		return "(" + paramDescriptors.toString() + ")" + toDescriptor(returnType);
 	}
 
 	/**
