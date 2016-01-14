@@ -122,9 +122,14 @@ public class ASMHelper
 	 */
 	public static byte[] writeClassToBytes(ClassNode classNode, int flags)
 	{
-		ClassWriter writer = new ObfRemappingClassWriter(flags);
-		classNode.accept(writer);
-		return writer.toByteArray();
+		if (ObfHelper.isObfuscated() && !ObfHelper.runsAfterDeobfRemapper())
+		{
+			ClassWriter writer = new ObfRemappingClassWriter(flags);
+			classNode.accept(writer);
+			return writer.toByteArray();
+		}
+		else
+			return writeClassToBytesNoDeobf(classNode, flags);
 	}
 
 	/**
@@ -133,7 +138,15 @@ public class ASMHelper
 	 */
 	public static byte[] writeClassToBytesNoDeobf(ClassNode classNode)
 	{
-		ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+		return writeClassToBytesNoDeobf(classNode, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+	}
+
+	/**
+	 * Overload of {@link #writeClassToBytesNoDeobf(ClassNode)} with a flags parameter.
+	 */
+	public static byte[] writeClassToBytesNoDeobf(ClassNode classNode, int flags)
+	{
+		ClassWriter writer = new ClassWriter(flags);
 		classNode.accept(writer);
 		return writer.toByteArray();
 	}
