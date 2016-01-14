@@ -21,31 +21,7 @@ import java.util.Map;
 
 public class ASMHelper
 {
-	private static Boolean isCauldron = null;
 	public static InsnComparator insnComparator = new InsnComparator();
-
-	/**
-	 * @return Whether or not Cauldron is loaded in the current environment.<br>
-	 * <br>
-	 * See: http://cauldron.minecraftforge.net/
-	 */
-	public static boolean isCauldron()
-	{
-		if (ASMHelper.isCauldron == null)
-		{
-			try
-			{
-				byte[] bytes = ((LaunchClassLoader) ASMHelper.class.getClassLoader()).getClassBytes("net.minecraftforge.cauldron.api.Cauldron");
-				ASMHelper.isCauldron = bytes != null;
-			}
-			catch (IOException e)
-			{
-				ASMHelper.isCauldron = false;
-			}
-		}
-
-		return ASMHelper.isCauldron;
-	}
 
 	/**
 	 * Converts a class name to an internal class name.
