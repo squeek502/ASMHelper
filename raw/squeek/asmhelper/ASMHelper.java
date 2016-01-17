@@ -88,7 +88,7 @@ public class ASMHelper
 	 */
 	public static byte[] writeClassToBytes(ClassNode classNode)
 	{
-		return writeClassToBytes(classNode, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+		return writeClassToBytes(classNode, ClassWriter.COMPUTE_MAXS);
 	}
 
 	/**
@@ -112,7 +112,7 @@ public class ASMHelper
 	 */
 	public static byte[] writeClassToBytesNoDeobf(ClassNode classNode)
 	{
-		return writeClassToBytesNoDeobf(classNode, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+		return writeClassToBytesNoDeobf(classNode, ClassWriter.COMPUTE_MAXS);
 	}
 
 	/**
@@ -121,18 +121,6 @@ public class ASMHelper
 	public static byte[] writeClassToBytesNoDeobf(ClassNode classNode, int flags)
 	{
 		ClassWriter writer = new ClassWriter(flags);
-		classNode.accept(writer);
-		return writer.toByteArray();
-	}
-
-	/**
-	 * Convert a ClassNode into a byte array.
-	 * Does not re-compute frames. Primarily useful for avoiding ClassNotFoundExceptions in
-	 * getCommonSuperClass that aren't solved by {@link #writeClassToBytes}/{@link ObfRemappingClassWriter}.
-	 */
-	public static byte[] writeClassToBytesNoDeobfSkipFrames(ClassNode classNode)
-	{
-		ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 		classNode.accept(writer);
 		return writer.toByteArray();
 	}
