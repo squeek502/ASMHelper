@@ -22,6 +22,7 @@ group = "squeek.asmhelper"
 dependencies.add("testCompile", "junit:junit:4.11")
 test.testLogging { events "skipped", "failed", "passed" }
 sourceSets.test.java.srcDirs += 'tests'
+test.exclude "**squeek/asmhelper/TestObfHelper.class"
 
 if (rootProject != project)
 {
