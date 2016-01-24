@@ -11,7 +11,10 @@ import java.util.Map;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.commons.Remapper;
+import org.objectweb.asm.commons.RemappingMethodAdapter;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InsnList;
@@ -771,6 +774,17 @@ public class ASMHelper
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Copy a method and rename it; everything else will be exactly the same
+	 * @return The renamed method copy
+	 */
+	public static MethodNode copyAndRenameMethod(ClassNode classNode, MethodNode method, String newMethodName)
+	{
+		MethodVisitor methodCopyVisitor = classNode.visitMethod(method.access, newMethodName, method.desc, method.signature, method.exceptions.toArray(new String[method.exceptions.size()]));
+		method.accept(new RemappingMethodAdapter(method.access, method.desc, methodCopyVisitor, new Remapper(){}));
+		return methodCopyVisitor instanceof MethodNode ? (MethodNode) methodCopyVisitor : null;
 	}
 
 	private static Printer printer = new Textifier();
