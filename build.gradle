@@ -1,20 +1,30 @@
 buildscript {
-    repositories {
-        jcenter()
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
-    }
-    dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
-    }
+	repositories {
+		jcenter()
+		maven {
+			name = "forge"
+			url = "http://files.minecraftforge.net/maven"
+		}
+	}
+	dependencies {
+		classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
+	}
 }
+
+apply plugin: 'java'
 
 group = "squeek.asmhelper"
 
+dependencies.add("testCompile", "junit:junit:4.11")
+test.testLogging { events "skipped", "failed", "passed" }
+sourceSets.test.java.srcDirs += 'tests'
+
 if (rootProject != project)
 {
+	rootProject.configurations.forgeGradleMc.allDependencies.each { dependencies.add("compile", it) }
+	rootProject.configurations.forgeGradleMcDeps.allDependencies.each { dependencies.add("compile", it) }
+	sourceSets.test.java.srcDirs += 'raw'
+
 	def generator = { String alphabet, int n ->
 		new Random().with {
 			(1..n).collect { alphabet[ nextInt( alphabet.length() ) ] }.join()
@@ -61,7 +71,7 @@ if (rootProject != project)
 		moveAndAlterPackage(srcDirPath, destDirPath, asmhelperPackage, asmhelperPackage + "." + appendedGroup)
 	}
 
-	rootProject.sourceSets.main.java.srcDirs += destDirPath
+	project.sourceSets.main.java.srcDirs += destDirPath
 	rootProject.tasks.sourceMainJava.dependsOn(generateProjectSpecificPackage)
 	rootProject.tasks.eclipseClasspath.dependsOn(generateProjectSpecificPackage)
 	rootProject.tasks.ideaModule.dependsOn(generateProjectSpecificPackage)
@@ -73,7 +83,6 @@ if (rootProject != project)
 else
 {
 	apply plugin: 'net.minecraftforge.gradle.forge'
-
 	minecraft {
 		version = "1.8.9-11.15.0.1684"
 		mappings = "stable_20"
@@ -81,15 +90,4 @@ else
 	}
 
 	sourceSets.main.java.srcDirs += 'raw'
-	sourceSets.test.java.srcDirs += 'tests'
-
-	dependencies {
-		testCompile 'junit:junit:4.11'
-	}
-
-	test {
-		testLogging {
-			events "skipped", "failed", "passed"
-		}
-	}
 }
