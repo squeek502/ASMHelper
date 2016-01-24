@@ -79,7 +79,7 @@ if (rootProject != project)
 
 	task copyToRootBuildPath(type: Copy, dependsOn: generateProjectSpecificPackage) {
 		from destDirPath
-		into rootProject.buildDir.getPath()+"/sources/java"
+		into rootProject.tasks.sourceMainJava.output
 	}
 
 	project.sourceSets.main.java.srcDirs += destDirPath
