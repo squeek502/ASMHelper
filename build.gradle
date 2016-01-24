@@ -18,6 +18,7 @@ group = "squeek.asmhelper"
 dependencies.add("testCompile", "junit:junit:4.11")
 test.testLogging { events "skipped", "failed", "passed" }
 sourceSets.test.java.srcDirs += 'tests'
+test.exclude "**squeek/asmhelper/TestObfHelper.class"
 
 if (rootProject != project)
 {
@@ -70,11 +71,18 @@ if (rootProject != project)
 	task generateProjectSpecificPackage() << {
 		moveAndAlterPackage(srcDirPath, destDirPath, asmhelperPackage, asmhelperPackage + "." + appendedGroup)
 	}
+	project.tasks.compileJava.dependsOn(generateProjectSpecificPackage)
+
+	task copyToRootBuildPath(type: Copy, dependsOn: generateProjectSpecificPackage) {
+		from destDirPath
+		into rootProject.buildDir.getPath()+"/sources/java"
+	}
 
 	project.sourceSets.main.java.srcDirs += destDirPath
 	rootProject.tasks.sourceMainJava.dependsOn(generateProjectSpecificPackage)
 	rootProject.tasks.eclipseClasspath.dependsOn(generateProjectSpecificPackage)
 	rootProject.tasks.ideaModule.dependsOn(generateProjectSpecificPackage)
+	rootProject.tasks.sourceMainJava.finalizedBy(copyToRootBuildPath)
 
 	task reincorporate() << {
 		moveAndAlterPackage(destDirPath, srcDirPath, asmhelperPackage + "." + appendedGroup, asmhelperPackage)
