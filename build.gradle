@@ -26,15 +26,16 @@ test.exclude "**squeek/asmhelper/TestObfHelper.class"
 
 if (rootProject != project)
 {
-	def shouldInheritDeps = { Configuration config -> config.name in ["minecraft", "minecraftDeps"] }
-	def addDep = { Object o -> dependencies.add("compile", o) }
-	def addDeps = { Configuration config ->
-		config.allDependencies.each(addDep)
-		config.allDependencies.whenObjectAdded(addDep)
+	def inheritDependencies = { Project from, List<String> configNames, String toDepName ->
+		def shouldInheritDeps = { Configuration config -> config.name in configNames }
+		def addDep = { Object o -> dependencies.add(toDepName, o) }
+		def addDeps = { Configuration config ->
+			config.allDependencies.each(addDep)
+			config.allDependencies.whenObjectAdded(addDep)
+		}
+		from.configurations.matching(shouldInheritDeps).each(addDeps)
+		from.configurations.whenObjectAdded({if (shouldInheritDeps(it)) { addDeps(it) }})
 	}
-	rootProject.configurations.whenObjectAdded({if (shouldInheritDeps(it)) { addDeps(it) }})
-	rootProject.configurations.matching(shouldInheritDeps).each(addDeps)
-	sourceSets.test.java.srcDirs += 'raw'
 
 	def generator = { String alphabet, int n ->
 		new Random().with {
@@ -78,25 +79,27 @@ if (rootProject != project)
 		}
 	}
 
-	task generateProjectSpecificPackage() << {
+	task generateProjectSpecificPackage << {
 		moveAndAlterPackage(srcDirPath, destDirPath, asmhelperPackage, asmhelperPackage + "." + appendedGroup)
 	}
-	project.tasks.compileJava.dependsOn(generateProjectSpecificPackage)
+
+	task reincorporate << {
+		moveAndAlterPackage(destDirPath, srcDirPath, asmhelperPackage + "." + appendedGroup, asmhelperPackage)
+	}
 
 	task copyToRootBuildPath(type: Copy, dependsOn: generateProjectSpecificPackage) {
 		from destDirPath
 		into rootProject.tasks.sourceMainJava.output
 	}
 
+	project.sourceSets.test.java.srcDirs += 'raw'
 	project.sourceSets.main.java.srcDirs += destDirPath
+	project.tasks.compileJava.dependsOn(generateProjectSpecificPackage)
 	rootProject.tasks.sourceMainJava.dependsOn(generateProjectSpecificPackage)
 	rootProject.tasks.eclipseClasspath.dependsOn(generateProjectSpecificPackage)
 	rootProject.tasks.ideaModule.dependsOn(generateProjectSpecificPackage)
 	rootProject.tasks.sourceMainJava.finalizedBy(copyToRootBuildPath)
-
-	task reincorporate() << {
-		moveAndAlterPackage(destDirPath, srcDirPath, asmhelperPackage + "." + appendedGroup, asmhelperPackage)
-	}
+	inheritDependencies(rootProject, ["minecraft", "minecraftDeps"], "compile")
 }
 else
 {
