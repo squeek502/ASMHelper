@@ -26,8 +26,14 @@ test.exclude "**squeek/asmhelper/TestObfHelper.class"
 
 if (rootProject != project)
 {
-	rootProject.configurations.minecraft.allDependencies.each { dependencies.add("compile", it) }
-	rootProject.configurations.minecraftDeps.allDependencies.each { dependencies.add("compile", it) }
+	def shouldInheritDeps = { Configuration config -> config.name in ["minecraft", "minecraftDeps"] }
+	def addDep = { Object o -> dependencies.add("compile", o) }
+	def addDeps = { Configuration config ->
+		config.allDependencies.each(addDep)
+		config.allDependencies.whenObjectAdded(addDep)
+	}
+	rootProject.configurations.whenObjectAdded({if (shouldInheritDeps(it)) { addDeps(it) }})
+	rootProject.configurations.matching(shouldInheritDeps).each(addDeps)
 	sourceSets.test.java.srcDirs += 'raw'
 
 	def generator = { String alphabet, int n ->
