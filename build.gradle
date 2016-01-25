@@ -94,12 +94,31 @@ if (rootProject != project)
 
 	project.sourceSets.test.java.srcDirs += 'raw'
 	project.sourceSets.main.java.srcDirs += destDirPath
-	project.tasks.compileJava.dependsOn(generateProjectSpecificPackage)
+	project.tasks.remove(project.tasks.compileJava)
+	project.tasks.remove(project.tasks.jar)
 	rootProject.tasks.sourceMainJava.dependsOn(generateProjectSpecificPackage)
 	rootProject.tasks.eclipseClasspath.dependsOn(generateProjectSpecificPackage)
 	rootProject.tasks.ideaModule.dependsOn(generateProjectSpecificPackage)
 	rootProject.tasks.sourceMainJava.finalizedBy(copyToRootBuildPath)
 	inheritDependencies(rootProject, ["minecraft", "minecraftDeps"], "compile")
+
+	// bypass the default gradle configurations (compile, runtime, etc) to add
+	// this project, so that this project doesn't get included in things like
+	// the maven plugin's depedency resolution
+	rootProject.configurations {
+		submodule { transitive = false }
+	}
+	rootProject.sourceSets {
+		[main, test].each { set ->
+			set.compileClasspath += rootProject.configurations.submodule
+			set.runtimeClasspath += rootProject.configurations.submodule
+		}
+	}
+	rootProject.dependencies {
+		submodule project(path: ':ASMHelper')
+	}
+	rootProject.eclipse.classpath.plusConfigurations += rootProject.configurations.submodule
+	rootProject.idea { module { scopes.COMPILE.plus += [rootProject.configurations.submodule] } }
 }
 else
 {
