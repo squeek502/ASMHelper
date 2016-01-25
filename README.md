@@ -5,7 +5,7 @@ A library of classes to help with ASM transformations in Minecraft mods
 
 Intended to be used as a git submodule and Gradle subproject
 - Add the submodule using `git submodule add https://github.com/squeek502/ASMHelper.git ASMHelper`
-- Add it as a Gradle subproject by creating a `settings.gradle` file with the contents: `include ":ASMHelper"` and add it as a dependency by adding the following to your `build.gradle file`: `dependencies { compile project(':ASMHelper') }`
+- Add it as a Gradle subproject by creating a `settings.gradle` file with the contents: `include ":ASMHelper"`
 - Initialize the submodule using `git submodule update --init`
 - Running `gradle eclipse` or `gradle idea` or `gradle build` will generate an ASMHelper package specific to your root gradle project (it uses the `group` property of the root project) and add it to your classpath
 - Anytime you want to update the submodule, do the following:
