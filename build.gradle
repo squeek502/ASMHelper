@@ -117,7 +117,7 @@ if (rootProject != project)
 	rootProject.dependencies {
 		submodule project(path: ':ASMHelper')
 	}
-	rootProject.eclipse.classpath.plusConfigurations += rootProject.configurations.submodule
+	rootProject.eclipse.classpath.plusConfigurations += [rootProject.configurations.submodule]
 	rootProject.idea { module { scopes.COMPILE.plus += [rootProject.configurations.submodule] } }
 }
 else
