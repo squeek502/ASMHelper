@@ -120,7 +120,7 @@ else
 {
 	apply plugin: 'net.minecraftforge.gradle.forge'
 	minecraft {
-		version = "1.9.4-12.16.1.1908-1.9.4"
+		version = "1.9.4-12.17.0.1930-1.9.4"
 		mappings = "snapshot_20160518"
 		runDir = "run"
 	}
