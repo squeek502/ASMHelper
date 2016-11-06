@@ -126,6 +126,15 @@ public class ASMHelper
 		classNode.accept(writer);
 		return writer.toByteArray();
 	}
+	
+	/**
+	 * Uses writeClassToBytes to write a ClassNode into a File for decompilation and analysis.
+	 */
+	public static void writeClassToFile(ClassNode classNode, File file) throws IOException {
+		FileOutputStream fos = new FileOutputStream(file);
+		fos.write(writeClassToBytes(classNode));
+		fos.close();
+	}
 
 	/**
 	 * @return An InputStream instance for the specified class name loaded by the specified ClassLoader.
