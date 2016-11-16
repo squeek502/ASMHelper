@@ -160,8 +160,11 @@ $RECYCLE.BIN/
 
 ### Gradle ###
 .gradle
+/gradle
 build/
 run/
+gradlew
+*.bat
 
 # Ignore Gradle GUI config
 gradle-app.setting
