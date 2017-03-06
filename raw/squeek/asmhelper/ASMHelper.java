@@ -1,13 +1,16 @@
 package squeek.asmhelper;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
@@ -30,6 +33,7 @@ public class ASMHelper
 {
 	private static Boolean isCauldron = null;
 	public static InsnComparator insnComparator = new InsnComparator();
+	private static final Multimap<String, String> interfaceLookupCache = HashMultimap.create();
 
 	/**
 	 * @return Whether or not Cauldron is loaded in the current environment.<br>
@@ -181,28 +185,40 @@ public class ASMHelper
 		return classReader.getSuperName() != null && !classReader.getSuperName().equals("java/lang/Object");
 	}
 
-	/**
-	 * @return Whether or not the class read by the ClassReader implements the specified interface.
-	 */
-	public static boolean doesClassImplement(ClassReader classReader, String targetInterfaceInternalClassName)
+	private static Collection<String> findAllInterfaces(ClassReader classReader)
 	{
-		List<String> immediateInterfaces = Arrays.asList(classReader.getInterfaces());
-		for (String immediateInterface : immediateInterfaces)
-		{
-			if (ObfHelper.getInternalClassName(immediateInterface).equals(targetInterfaceInternalClassName))
-				return true;
-		}
+		// TODO: Find interfaces inside interfaces
+		Set<String> interfaces = Sets.newHashSet(classReader.getInterfaces());
 
 		try
 		{
 			if (classHasSuper(classReader))
-				return doesClassImplement(getClassReaderForClassName(ObfHelper.getInternalClassName(classReader.getSuperName())), targetInterfaceInternalClassName);
+			{
+				String className2 = ObfHelper.getInternalClassName(classReader.getSuperName());
+				if (interfaceLookupCache.containsKey(className2))
+					interfaces.addAll(interfaceLookupCache.get(className2));
+				else
+					interfaces.addAll(findAllInterfaces(getClassReaderForClassName(className2)));
+			}
 		}
 		catch (IOException e)
 		{
 			// This will trigger when the super class is abstract; just ignore the error
 		}
-		return false;
+
+		interfaceLookupCache.putAll(classReader.getClassName(), interfaces);
+		return interfaces;
+	}
+
+	/**
+	 * @return Whether or not the class read by the ClassReader implements the specified interface.
+	 */
+	public static boolean doesClassImplement(ClassReader classReader, String targetInterfaceInternalClassName)
+	{
+		if (!interfaceLookupCache.containsKey(classReader.getClassName()))
+			findAllInterfaces(classReader);
+
+		return interfaceLookupCache.get(classReader.getClassName()).contains(targetInterfaceInternalClassName);
 	}
 
 	/**
