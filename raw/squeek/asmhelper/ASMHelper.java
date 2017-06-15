@@ -28,7 +28,7 @@ import java.util.Set;
 public class ASMHelper
 {
 	public static InsnComparator insnComparator = new InsnComparator();
-	private static final Multimap<String, String> interfaceLookupCache = HashMultimap.create();
+	private static final Multimap<String, String> INTERFACE_LOOKUP_CACHE = HashMultimap.create();
 
 	/**
 	 * Converts a class name to an internal class name.
@@ -176,8 +176,8 @@ public class ASMHelper
 			if (classHasSuper(classReader))
 			{
 				String className2 = ObfHelper.getInternalClassName(classReader.getSuperName());
-				if (interfaceLookupCache.containsKey(className2))
-					interfaces.addAll(interfaceLookupCache.get(className2));
+				if (INTERFACE_LOOKUP_CACHE.containsKey(className2))
+					interfaces.addAll(INTERFACE_LOOKUP_CACHE.get(className2));
 				else
 					interfaces.addAll(findAllInterfaces(getClassReaderForClassName(className2)));
 			}
@@ -187,7 +187,7 @@ public class ASMHelper
 			// This will trigger when the super class is abstract; just ignore the error
 		}
 
-		interfaceLookupCache.putAll(classReader.getClassName(), interfaces);
+		INTERFACE_LOOKUP_CACHE.putAll(classReader.getClassName(), interfaces);
 		return interfaces;
 	}
 
@@ -196,10 +196,10 @@ public class ASMHelper
 	 */
 	public static boolean doesClassImplement(ClassReader classReader, String targetInterfaceInternalClassName)
 	{
-		if (!interfaceLookupCache.containsKey(classReader.getClassName()))
+		if (!INTERFACE_LOOKUP_CACHE.containsKey(classReader.getClassName()))
 			findAllInterfaces(classReader);
 
-		return interfaceLookupCache.get(classReader.getClassName()).contains(targetInterfaceInternalClassName);
+		return INTERFACE_LOOKUP_CACHE.get(classReader.getClassName()).contains(targetInterfaceInternalClassName);
 	}
 
 	/**

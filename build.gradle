@@ -4,7 +4,7 @@ buildscript {
         maven { url = "http://files.minecraftforge.net/maven" }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
     }
 }
 
@@ -117,8 +117,8 @@ else
 {
 	apply plugin: 'net.minecraftforge.gradle.forge'
 	minecraft {
-		version = "1.11-13.19.0.2127-1.11.x"
-		mappings = "snapshot_20161111"
+		version = "14.21.0.2327"
+		mappings = "snapshot_20170615"
 		runDir = "run"
 	}
 
