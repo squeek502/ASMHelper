@@ -178,6 +178,37 @@ public class TestASMHelper
 	}
 
 	@Test
+	public void findAndReplaceAllReplacesCorrectly()
+	{
+		InsnList needle = new InsnList();
+		InsnList haystack = new InsnList();
+		InsnList replacement = new InsnList();
+		InsnList result = new InsnList();
+
+		needle.add(new VarInsnNode(ALOAD, InsnComparator.INT_WILDCARD));
+		needle.add(new FieldInsnNode(GETFIELD, InsnComparator.WILDCARD, InsnComparator.WILDCARD, InsnComparator.WILDCARD));
+
+		replacement.add(new VarInsnNode(ALOAD, 0));
+
+		haystack.add(new VarInsnNode(ALOAD, 0));
+		haystack.add(new FieldInsnNode(GETFIELD, "dummy", "dummy", "dummy"));
+		haystack.add(new VarInsnNode(ALOAD, 1));
+		haystack.add(new FieldInsnNode(GETFIELD, "dummy", "dummy", "dummy"));
+		haystack.add(new VarInsnNode(ALOAD, 2));
+		haystack.add(new FieldInsnNode(GETFIELD, "dummy", "dummy", "dummy"));
+		haystack.add(new InsnNode(RETURN));
+
+		result.add(new VarInsnNode(ALOAD, 0));
+		result.add(new VarInsnNode(ALOAD, 0));
+		result.add(new VarInsnNode(ALOAD, 0));
+		result.add(new InsnNode(RETURN));
+
+		ASMHelper.findAndReplaceAll(haystack, needle, replacement);
+		assertEquals(4, haystack.size());
+		assertTrue(ASMHelper.patternMatches(result, haystack.getFirst()));
+	}
+
+	@Test
 	public void findAndReplaceHandlesLabelsCorrectly()
 	{
 		InsnList needle = new InsnList();
