@@ -723,7 +723,8 @@ public class ASMHelper
 	public static int findAndReplaceAll(InsnList haystack, InsnList needle, InsnList replacement, AbstractInsnNode haystackStart)
 	{
 		int numReplaced = 0;
-		while ((haystackStart = findAndReplace(haystack, needle, replacement, haystackStart)) != null)
+		// insert/insertBefore clears the replacement list, so we need to use a copy each time
+		while ((haystackStart = findAndReplace(haystack, needle, cloneInsnList(replacement), haystackStart)) != null)
 		{
 			numReplaced++;
 		}
