@@ -1,22 +1,18 @@
 package squeek.asmhelper;
 
-import org.junit.Test;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.*;
-
-import static org.junit.Assert.*;
-import static org.objectweb.asm.Opcodes.*;
+import net.minecraftforge.coremod.CoreModTestRunner;
+import org.junit.jupiter.api.Test;
 
 public class TestASMHelper
 {
 
 	@Test
-	public void toMethodDescriptor()
+	void toMethodDescriptor()
 	{
-		assertEquals("(Linternal/class/name;Lclass/descriptor;)Lclass/name;", ASMHelper.toMethodDescriptor("class.name", "internal/class/name", "Lclass/descriptor;"));
-		assertEquals("(FZ)V", ASMHelper.toMethodDescriptor("V", "F", "Z"));
+		CoreModTestRunner.runJavascriptTest("toMethodDescriptor.js");
 	}
 
+/*
 	@Test
 	public void instructionMatchingMustMatchExactly()
 	{
@@ -306,5 +302,5 @@ public class TestASMHelper
 
 		return haystack;
 	}
-
+	*/
 }

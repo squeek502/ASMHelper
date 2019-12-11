@@ -1,126 +1,34 @@
-buildscript {
-    repositories {
-        jcenter()
-        maven { url = "http://files.minecraftforge.net/maven" }
-    }
-    dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-    }
-}
-
 apply plugin: 'java'
 
 group = "squeek.asmhelper"
 
-dependencies.add("testCompile", "junit:junit:4.11")
-test.testLogging { events "skipped", "failed", "passed" }
-sourceSets.test.java.srcDirs += 'tests'
-test.exclude "**squeek/asmhelper/TestObfHelper.class"
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
-if (rootProject != project)
-{
-	def inheritDependencies = { Project from, List<String> configNames, String toDepName ->
-		def shouldInheritDeps = { Configuration config -> config.name in configNames }
-		def addDep = { Object o -> dependencies.add(toDepName, o) }
-		def addDeps = { Configuration config ->
-			config.allDependencies.each(addDep)
-			config.allDependencies.whenObjectAdded(addDep)
-		}
-		from.configurations.matching(shouldInheritDeps).each(addDeps)
-		from.configurations.whenObjectAdded({if (shouldInheritDeps(it)) { addDeps(it) }})
-	}
-
-	def generator = { String alphabet, int n ->
-		new Random().with {
-			(1..n).collect { alphabet[ nextInt( alphabet.length() ) ] }.join()
-		}
-	}
-	def pkgToPath = { String pkg -> pkg.tokenize('.').join('/') }
-	def pathToPkg = { String path -> path.tokenize('/').join('.') }
-
-	def rawJavaDir = "raw"
-	def finalJavaDir = "gen"
-	def appendedGroup = rootProject.group != null && !rootProject.group.isEmpty() ? rootProject.group : generator( ('a'..'z').join(), 9 )
-	def srcDirPath = project.projectDir.getPath() + "/" + rawJavaDir
-	def destDirPath = project.projectDir.getPath() + "/" + finalJavaDir
-	def asmhelperPackage = project.group
-
-	def moveAndAlterPackage = { String oldDir, String newDir, String oldPackage, String newPackage ->
-		def searchDir = file(oldDir)
-		def rootDestDir = file(newDir)
-
-		// clean
-		if (rootDestDir.exists())
-			rootDestDir.deleteDir()
-
-		def destDir = file(rootDestDir.getPath() + "/" + pkgToPath(newPackage))
-		def srcTree = fileTree(dir: searchDir, include: '**/*.java')
-		def filesToDelete = []
-		def filesToAdd = []
-		srcTree.each { file -> 
-			def updatedContent = file.getText('UTF-8')
-			updatedContent = updatedContent.replaceAll("package " + oldPackage, "package " + newPackage)
-			updatedContent = updatedContent.replaceAll("import " + oldPackage, "import " + newPackage)
-			def updatedFile = new File(destDir, file.getName())
-			filesToAdd += [ file: updatedFile, content: updatedContent ]
-			logger.lifecycle("Processed " + file.getPath().replace(project.projectDir.getPath() + File.separator, "") + ", copying to " + updatedFile.getPath().replace(project.projectDir.getPath() + File.separator, ""))
-		}
-		filesToAdd.each { fileToAdd -> 
-			if (!fileToAdd.file.getParentFile().exists())
-				fileToAdd.file.getParentFile().mkdirs()
-			fileToAdd.file.write(fileToAdd.content, 'UTF-8')
-		}
-	}
-
-	task generateProjectSpecificPackage << {
-		moveAndAlterPackage(srcDirPath, destDirPath, asmhelperPackage, asmhelperPackage + "." + appendedGroup)
-	}
-
-	task reincorporate << {
-		moveAndAlterPackage(destDirPath, srcDirPath, asmhelperPackage + "." + appendedGroup, asmhelperPackage)
-	}
-
-	task copyToRootBuildPath(type: Copy, dependsOn: generateProjectSpecificPackage) {
-		from destDirPath
-		into rootProject.tasks.sourceMainJava.output
-	}
-
-	project.sourceSets.test.java.srcDirs += 'raw'
-	project.sourceSets.main.java.srcDirs += destDirPath
-	project.tasks.remove(project.tasks.compileJava)
-	project.tasks.remove(project.tasks.jar)
-	rootProject.tasks.sourceMainJava.dependsOn(generateProjectSpecificPackage)
-	rootProject.tasks.eclipseClasspath.dependsOn(generateProjectSpecificPackage)
-	rootProject.tasks.ideaModule.dependsOn(generateProjectSpecificPackage)
-	rootProject.tasks.sourceMainJava.finalizedBy(copyToRootBuildPath)
-	inheritDependencies(rootProject, ["forgeGradleMc", "forgeGradleMcDeps"], "compile")
-
-	// bypass the default gradle configurations (compile, runtime, etc) to add
-	// this project, so that this project doesn't get included in things like
-	// the maven plugin's depedency resolution
-	rootProject.configurations {
-		submodule { transitive = false }
-	}
-	rootProject.sourceSets {
-		[main, test].each { set ->
-			set.compileClasspath += rootProject.configurations.submodule
-			set.runtimeClasspath += rootProject.configurations.submodule
-		}
-	}
-	rootProject.dependencies {
-		submodule project(path: ':ASMHelper')
-	}
-	rootProject.eclipse.classpath.plusConfigurations += [rootProject.configurations.submodule]
-	rootProject.idea { module { scopes.COMPILE.plus += [rootProject.configurations.submodule] } }
+test {
+    useJUnitPlatform()
 }
-else
-{
-	apply plugin: 'net.minecraftforge.gradle.forge'
-	minecraft {
-		version = "14.21.0.2327"
-		mappings = "snapshot_20170615"
-		runDir = "run"
-	}
 
-	sourceSets.main.java.srcDirs += 'raw'
+repositories {
+    mavenCentral()
+    maven {
+        name = "forge"
+        url = "http://files.minecraftforge.net/maven"
+    }
+}
+
+dependencies {
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.5.+")
+    testImplementation("org.powermock:powermock-core:2.0.+")
+    testImplementation("org.hamcrest:hamcrest-core:2.2")
+    testImplementation("org.apache.logging.log4j:log4j-core:2.12.+")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.5.+")
+    implementation("cpw.mods:modlauncher:5.0.+")
+    implementation("org.apache.logging.log4j:log4j-api:2.12.+")
+    implementation("org.ow2.asm:asm:7.2")
+    implementation("org.ow2.asm:asm-commons:7.2")
+    implementation("org.ow2.asm:asm-tree:7.2")
+    implementation("net.minecraftforge:forgespi:2.0.+")
+    implementation("net.minecraftforge:coremods:2.0.+")
+    implementation("com.google.code.findbugs:jsr305:3.0.2")
 }
