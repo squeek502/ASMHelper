@@ -5,11 +5,16 @@ import org.junit.jupiter.api.Test;
 
 public class TestASMHelper
 {
-
 	@Test
 	void toMethodDescriptor()
 	{
 		CoreModTestRunner.runJavascriptTest("toMethodDescriptor.js");
+	}
+
+	@Test
+	void instructionMatchingMustMatchExactly()
+	{
+		CoreModTestRunner.runJavascriptTest("instructionMatchingMustMatchExactly.js");
 	}
 
 /*

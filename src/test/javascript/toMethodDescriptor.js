@@ -1,5 +1,4 @@
 var ASMAPI = Java.type("net.minecraftforge.coremod.api.ASMAPI");
-var opcodes = Java.type('org.objectweb.asm.Opcodes');
 
 function initializeCoreMod() {
 	ASMAPI.loadFile('../../main/javascript/asmhelper.js');
