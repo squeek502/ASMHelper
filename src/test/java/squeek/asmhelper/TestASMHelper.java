@@ -2,6 +2,9 @@ package squeek.asmhelper;
 
 import net.minecraftforge.coremod.CoreModTestRunner;
 import org.junit.jupiter.api.Test;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.LineNumberNode;
 
 public class TestASMHelper
 {
@@ -17,96 +20,42 @@ public class TestASMHelper
 		CoreModTestRunner.runJavascriptTest("instructionMatchingMustMatchExactly.js");
 	}
 
+	@Test
+	void instructionMatchingHasWildcardSupport()
+	{
+		CoreModTestRunner.runJavascriptTest("instructionMatchingHasWildcardSupport.js");
+	}
+
+	@Test
+	void lineNumberAndLabelInstructionsAlwaysMatch()
+	{
+		CoreModTestRunner.runJavascriptTest("lineNumberAndLabelInstructionsAlwaysMatch.js");
+	}
+
+	@Test
+	void patternMatchingIgnoresLabelsAndLineNumbers()
+	{
+		CoreModTestRunner.runJavascriptTest("patternMatchingIgnoresLabelsAndLineNumbers.js");
+	}
+
+	@Test
+	void patternNeedlesCanNotBeLargerThanTheHaystack()
+	{
+		CoreModTestRunner.runJavascriptTest("patternNeedlesCanNotBeLargerThanTheHaystack.js");
+	}
+
+	@Test
+	void patternNeedlesCanBeSmallerThanTheHaystack()
+	{
+		CoreModTestRunner.runJavascriptTest("patternNeedlesCanBeSmallerThanTheHaystack.js");
+	}
+
+	@Test
+	void findReturnsTheStartOfTheNeedleFoundInTheHaystack()
+	{
+		CoreModTestRunner.runJavascriptTest("findReturnsTheStartOfTheNeedleFoundInTheHaystack.js");
+	}
 /*
-	@Test
-	public void instructionMatchingMustMatchExactly()
-	{
-		assertTrue(ASMHelper.instructionsMatch(new InsnNode(RETURN), new InsnNode(RETURN)));
-		assertTrue(ASMHelper.instructionsMatch(new VarInsnNode(ALOAD, 0), new VarInsnNode(ALOAD, 0)));
-		assertFalse(ASMHelper.instructionsMatch(new VarInsnNode(ILOAD, 0), new VarInsnNode(ALOAD, 0)));
-		assertFalse(ASMHelper.instructionsMatch(new VarInsnNode(ALOAD, 0), new VarInsnNode(ALOAD, 1)));
-		assertTrue(ASMHelper.instructionsMatch(new LdcInsnNode("test"), new LdcInsnNode("test")));
-		assertFalse(ASMHelper.instructionsMatch(new LdcInsnNode("test"), new LdcInsnNode("test-diff")));
-	}
-
-	@Test
-	public void instructionMatchingHasWildcardSupport()
-	{
-		assertTrue(ASMHelper.instructionsMatch(new VarInsnNode(ALOAD, 0), new VarInsnNode(ALOAD, InsnComparator.INT_WILDCARD)));
-		assertTrue(ASMHelper.instructionsMatch(new LdcInsnNode("test"), new LdcInsnNode(InsnComparator.WILDCARD)));
-	}
-
-	@Test
-	public void lineNumberAndLabelInstructionsAlwaysMatch()
-	{
-		assertTrue(ASMHelper.instructionsMatch(new LabelNode(), new LabelNode()));
-		assertTrue(ASMHelper.instructionsMatch(new LineNumberNode(0, new LabelNode()), new LineNumberNode(0, new LabelNode())));
-		assertTrue(ASMHelper.instructionsMatch(new LineNumberNode(0, new LabelNode()), new LineNumberNode(100, new LabelNode())));
-	}
-
-	@Test
-	public void patternMatchingIgnoresLabelsAndLineNumbers()
-	{
-		InsnList haystack = new InsnList();
-		haystack.add(new LabelNode());
-		haystack.add(new VarInsnNode(ALOAD, 0));
-		haystack.add(new LineNumberNode(10, new LabelNode()));
-
-		InsnList needle = new InsnList();
-		needle.add(new LineNumberNode(1, new LabelNode()));
-		needle.add(new VarInsnNode(ALOAD, 0));
-		needle.add(new LabelNode());
-		needle.add(new LineNumberNode(2, new LabelNode()));
-		needle.add(new LabelNode());
-
-		assertTrue(ASMHelper.patternMatches(needle, haystack.getFirst()));
-	}
-
-	@Test
-	public void patternNeedlesCanNotBeLargerThanTheHaystack()
-	{
-		InsnList haystack = new InsnList();
-		haystack.add(new VarInsnNode(ALOAD, 0));
-
-		InsnList needle = new InsnList();
-		needle.add(new VarInsnNode(ALOAD, 0));
-		needle.add(new VarInsnNode(ALOAD, 1));
-
-		assertFalse(ASMHelper.patternMatches(needle, haystack.getFirst()));
-	}
-
-	@Test
-	public void patternNeedlesCanBeSmallerThanTheHaystack()
-	{
-		InsnList haystack = new InsnList();
-		haystack.add(new VarInsnNode(ALOAD, 0));
-		haystack.add(new VarInsnNode(ALOAD, 1));
-
-		InsnList needle = new InsnList();
-		needle.add(new VarInsnNode(ALOAD, 0));
-
-		assertTrue(ASMHelper.patternMatches(needle, haystack.getFirst()));
-	}
-
-	@Test
-	public void findReturnsTheStartOfTheNeedleFoundInTheHaystack()
-	{
-		InsnList needle = new InsnList();
-		InsnList haystack = populateTestHaystack(new InsnList());
-
-		needle.add(new VarInsnNode(ALOAD, 0));
-		assertEquals(haystack.get(2), ASMHelper.find(haystack, needle));
-
-		needle.add(new FieldInsnNode(GETFIELD, InsnComparator.WILDCARD, "foodLevel", "I"));
-		assertEquals(haystack.get(2), ASMHelper.find(haystack, needle));
-
-		needle.add(new VarInsnNode(ISTORE, 3));
-		assertEquals(haystack.get(2), ASMHelper.find(haystack, needle));
-
-		needle.add(new VarInsnNode(ALOAD, 0));
-		assertEquals(haystack.get(2), ASMHelper.find(haystack, needle));
-	}
-
 	@Test
 	public void findReturnsNullWhenNeedleIsNotFoundOrEmpty()
 	{

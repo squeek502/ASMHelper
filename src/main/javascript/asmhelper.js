@@ -6,6 +6,7 @@ var MethodInsnNode = Java.type("org.objectweb.asm.tree.MethodInsnNode");
 var JumpInsnNode = Java.type("org.objectweb.asm.tree.JumpInsnNode");
 var InsnNode = Java.type("org.objectweb.asm.tree.InsnNode");
 var MethodNode = Java.type("org.objectweb.asm.tree.MethodNode");
+var AbstractInsnNode = Java.type("org.objectweb.asm.tree.AbstractInsnNode");
 var Type = Java.type("org.objectweb.asm.Type");
 var ASMAPI = Java.type("net.minecraftforge.coremod.api.ASMAPI");
 
@@ -53,6 +54,29 @@ var ASMHelper = {
 		});
 	},
 	/**
+	 * @return The first instruction for which {@link AbstractInsnNode#getOpcode()} == {@code opcode} (could be {@code firstInsnToCheck}).
+	 * If {@code reverseDirection} is {@code true}, instructions will be traversed backwards (using getPrevious()).
+	 * If a matching instruction cannot be found, returns {@code null}.
+	 */
+	/*AbstractInsnNode*/ getOrFindInstructionWithOpcode: function(/*AbstractInsnNode*/ firstInsnToCheck, /*int*/ opcode, /*boolean*/ reverseDirection)
+	{
+		for (var instruction = firstInsnToCheck; instruction != null; instruction = reverseDirection ? instruction.getPrevious() : instruction.getNext())
+		{
+			if (instruction.getOpcode() == opcode)
+				return instruction;
+		}
+		return null;
+	},
+	/**
+	 * @return The next instruction after {@code instruction} for which {@link AbstractInsnNode#getOpcode()} == {@code opcode}
+	 * (excluding {@code instruction}).
+	 * If a matching instruction cannot be found, returns {@code null}.
+	 */
+	/*AbstractInsnNode*/ findNextInstructionWithOpcode: function(/*AbstractInsnNode*/ instruction, /*int*/ opcode)
+	{
+		return this.getOrFindInstructionWithOpcode(instruction.getNext(), opcode);
+	},
+	/**
 	 * Clones an instruction list, remapping labels in the process.
 	 *
 	 * @return The cloned {@code InsnList}
@@ -88,14 +112,116 @@ var ASMHelper = {
 	{
 		return ASMAPI.findFirstInstruction(method, opcode);
 	},
-
+	/**
+	 * @return Whether or not the instruction is a label or a line number.
+	 */
+	/*boolean*/ isLabelOrLineNumber: function(/*AbstractInsnNode*/ insn)
+	{
+		return insn.getType() == AbstractInsnNode.LABEL || insn.getType() == AbstractInsnNode.LINE;
+	},
 	/**
 	 * Convenience method for accessing {@link InsnComparator#areInsnsEqual}
 	 */
 	instructionsMatch: function(first, second)
 	{
-		return ASMHelper.InsnComparator.areInsnsEqual(first, second);
-	}
+		return this.InsnComparator.areInsnsEqual(first, second);
+	},
+	/**
+	 * @return Whether or not the pattern in {@code checkFor} matches starting at {@code checkAgainst}
+	 */
+	/*boolean*/ patternMatches: function(/*InsnList*/ checkFor, /*AbstractInsnNode*/ checkAgainst)
+	{
+		return this.checkForPatternAt(checkFor, checkAgainst).getFirst() != null;
+	},
+	/**
+	 * Checks whether or not the pattern in {@code checkFor} matches, starting at {@code checkAgainst}.
+	 *
+	 * @return All of the instructions that were matched by the {@code checkFor} pattern.
+	 * If the pattern was not found, returns an empty {@link InsnList}.<br>
+	 * <br>
+	 * Note: If the pattern was matched, the size of the returned {@link InsnList} will be >= {@code checkFor}.size().
+	 */
+	/*InsnList*/ checkForPatternAt: function(/*InsnList*/ checkFor, /*AbstractInsnNode*/ checkAgainst)
+	{
+		var foundInsnList = new InsnList();
+		var firstNeedleFound = false;
+		var lookFor = checkFor.getFirst();
+		while (lookFor != null)
+		{
+			if (checkAgainst == null)
+				return new InsnList();
+
+			if (this.isLabelOrLineNumber(lookFor))
+			{
+				lookFor = lookFor.getNext();
+				continue;
+			}
+
+			if (this.isLabelOrLineNumber(checkAgainst))
+			{
+				if (firstNeedleFound)
+					foundInsnList.add(checkAgainst);
+				checkAgainst = checkAgainst.getNext();
+				continue;
+			}
+
+			if (!this.instructionsMatch(lookFor, checkAgainst))
+				return new InsnList();
+
+			foundInsnList.add(checkAgainst);
+			lookFor = lookFor.getNext();
+			checkAgainst = checkAgainst.getNext();
+			firstNeedleFound = true;
+		}
+		return foundInsnList;
+	},
+	/**
+	 * Searches for the pattern in {@code needle}, starting at {@code haystackStart}.
+	 *
+	 * @return All of the instructions that were matched by the pattern.
+	 * If the pattern was not found, returns an empty {@link InsnList}.<br>
+	 * <br>
+	 * Note: If the pattern was matched, the size of the returned {@link InsnList} will be >= {@code checkFor}.size().
+	 */
+	/*InsnList*/ findAndGetFoundInsnList: function(/*AbstractInsnNode*/ haystackStart, /*InsnList*/ needle)
+	{
+		var needleStartOpcode = needle.getFirst().getOpcode();
+		var checkAgainstStart = this.getOrFindInstructionWithOpcode(haystackStart, needleStartOpcode);
+		while (checkAgainstStart != null)
+		{
+			var found = this.checkForPatternAt(needle, checkAgainstStart);
+
+			if (found.getFirst() != null)
+				return found;
+
+			checkAgainstStart = this.findNextInstructionWithOpcode(checkAgainstStart, needleStartOpcode);
+		}
+		return new InsnList();
+	},
+	/**
+	 * Searches for an instruction matching {@code needle}, starting at {@code haystackStart}.
+	 *
+	 * @return The matching instruction.
+	 * If a matching instruction was not found, returns {@code null}.
+	 */
+	/*AbstractInsnNode*/ find: function(/*AbstractInsnNode or InsnList*/ haystackStart, /*AbstractInsnNode or InsnList*/ needleStart)
+	{
+		var needle = new InsnList();
+		if (haystackStart instanceof InsnList) {
+			haystackStart = haystackStart.getFirst();
+		}
+		if (needleStart instanceof InsnList) {
+			needle = needleStart;
+		} else {
+			needle.add(needleStart);
+		}
+
+		if (needle.getFirst() == null)
+			return null;
+
+		var found = this.findAndGetFoundInsnList(haystackStart, needle);
+		return found.getFirst();
+	},
 }
 
 ASMHelper.InsnComparator = {
