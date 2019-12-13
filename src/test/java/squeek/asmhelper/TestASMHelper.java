@@ -91,4 +91,10 @@ public class TestASMHelper
 	{
 		CoreModTestRunner.runJavascriptTest("findAndReplaceHandlesLabelsCorrectly.js");
 	}
+
+	@Test
+	void dontPolluteGlobals()
+	{
+		CoreModTestRunner.runJavascriptTest("dontPolluteGlobals.js");
+	}
 }
