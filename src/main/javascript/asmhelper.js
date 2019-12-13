@@ -77,6 +77,24 @@ var ASMHelper = {
 		return this.getOrFindInstructionWithOpcode(instruction.getNext(), opcode);
 	},
 	/**
+	 * Remove instructions from {@code insnList} starting with {@code startInclusive}
+	 * up until reaching {@code endNotInclusive} ({@code endNotInclusive} will not be removed).
+	 *
+	 * @return The number of instructions removed
+	 */
+	/*int*/ removeFromInsnListUntil: function(/*InsnList*/ insnList, /*AbstractInsnNode*/ startInclusive, /*AbstractInsnNode*/ endNotInclusive)
+	{
+		var insnToRemove = startInclusive;
+		var numDeleted = 0;
+		while (insnToRemove != null && insnToRemove != endNotInclusive)
+		{
+			numDeleted++;
+			insnToRemove = insnToRemove.getNext();
+			insnList.remove(insnToRemove.getPrevious());
+		}
+		return numDeleted;
+	},
+	/**
 	 * Clones an instruction list, remapping labels in the process.
 	 *
 	 * @return The cloned {@code InsnList}
@@ -221,6 +239,43 @@ var ASMHelper = {
 
 		var found = this.findAndGetFoundInsnList(haystackStart, needle);
 		return found.getFirst();
+	},
+	/**
+	 * Searches for the pattern in {@code needle} within {@code haystack} (starting at {@code haystackStart})
+	 * and replaces it with {@code replacement}.
+	 *
+	 * @return The instruction after the replacement.
+	 * If the pattern was not found, returns {@code null}.
+	 */
+	/*AbstractInsnNode*/ findAndReplace: function(/*InsnList*/ haystack, /*InsnList*/ needle, /*InsnList*/ replacement, /*AbstractInsnNode*/ haystackStart)
+	{
+		if (!haystackStart) haystackStart = haystack.getFirst();
+		var found = this.findAndGetFoundInsnList(haystackStart, needle);
+		if (found.getFirst() != null)
+		{
+			haystack.insertBefore(found.getFirst(), replacement);
+			var afterNeedle = found.getLast().getNext();
+			this.removeFromInsnListUntil(haystack, found.getFirst(), afterNeedle);
+			return afterNeedle;
+		}
+		return null;
+	},
+	/**
+	 * Searches for all instances of the pattern in {@code needle} within {@code haystack}
+	 * (starting at {@code haystackStart}) and replaces them with {@code replacement}.
+	 *
+	 * @return The number of replacements made.
+	 */
+	/*int*/ findAndReplaceAll: function(/*InsnList*/ haystack, /*InsnList*/ needle, /*InsnList*/ replacement, /*AbstractInsnNode*/ haystackStart)
+	{
+		if (!haystackStart) haystackStart = haystack.getFirst();
+		var numReplaced = 0;
+		// insert/insertBefore clears the replacement list, so we need to use a copy each time
+		while ((haystackStart = this.findAndReplace(haystack, needle, this.cloneInsnList(replacement), haystackStart)) != null)
+		{
+			numReplaced++;
+		}
+		return numReplaced;
 	},
 }
 
