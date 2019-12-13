@@ -5,7 +5,7 @@ var VarInsnNode = Java.type("org.objectweb.asm.tree.VarInsnNode");
 
 function initializeCoreMod() {
 	ASMAPI.loadFile('../../main/javascript/asmhelper.js');
-	ASMAPI.loadFile('jankytest.js');
+	ASMAPI.loadFile('utils/jankytest.js');
 
 	var haystack = new InsnList();
 	haystack.add(new VarInsnNode(Opcodes.ALOAD, 0));

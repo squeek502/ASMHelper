@@ -9,8 +9,8 @@ var ISTORE = Opcodes.ISTORE;
 
 function initializeCoreMod() {
 	ASMAPI.loadFile('../../main/javascript/asmhelper.js');
-	ASMAPI.loadFile('jankytest.js');
-	ASMAPI.loadFile('setup.js');
+	ASMAPI.loadFile('utils/jankytest.js');
+	ASMAPI.loadFile('utils/setup.js');
 	var InsnComparator = ASMHelper.InsnComparator;
 
 	var needle = new InsnList();

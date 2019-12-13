@@ -5,7 +5,7 @@ var LdcInsnNode = Java.type("org.objectweb.asm.tree.LdcInsnNode");
 
 function initializeCoreMod() {
 	ASMAPI.loadFile('../../main/javascript/asmhelper.js');
-	ASMAPI.loadFile('jankytest.js');
+	ASMAPI.loadFile('utils/jankytest.js');
 	var InsnComparator = ASMHelper.InsnComparator;
 
 	assertTrue(ASMHelper.instructionsMatch(new VarInsnNode(Opcodes.ALOAD, 0), new VarInsnNode(Opcodes.ALOAD, InsnComparator.INT_WILDCARD)));
