@@ -15,6 +15,12 @@ public class TestASMHelper
 	}
 
 	@Test
+	void getOrFindInstruction()
+	{
+		CoreModTestRunner.runJavascriptTest("getOrFindInstruction.js");
+	}
+
+	@Test
 	void instructionMatchingMustMatchExactly()
 	{
 		CoreModTestRunner.runJavascriptTest("instructionMatchingMustMatchExactly.js");

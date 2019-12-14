@@ -4,7 +4,7 @@ ASMHelper
 A library of functions to help with ASM transformations in Minecraft mods
 
 With Forge > 1.14, [Forge CoreMods](https://github.com/MinecraftForge/CoreMods) are now implemented in Javascript.
-This branch is a **work-in-progress** port of ASMHelper from Java to Javascript in order to make it easier to port mods that used ASMHelper to 1.14+.
+This branch is a port of ASMHelper from Java to Javascript in order to make it easier to port mods that used ASMHelper to 1.14+.
 
 To use the Javascript version, put [asmhelper.js](src/main/javascript/asmhelper.js) next to your core mod's javascript file and load it in your `initializeCoreMods` function like so:
 
@@ -29,3 +29,7 @@ function initializeCoreMod() {
     }
 }
 ```
+
+## Breaking Changes
+
+Some methods that existed in the Java version have not been ported to Javascript. This is either because they are no longer applicable or they simply were not used by AppleCore and so porting them was not worth the effort. Pull requests for any unported functions are welcome!

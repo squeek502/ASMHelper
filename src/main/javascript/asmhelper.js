@@ -16,20 +16,20 @@ var ASMHelper = (function() {
 		 * Converts a class name to an internal class name.
 		 * @return internal/class/name
 		 */
-		toInternalClassName: function(className) {
+		/*String*/ toInternalClassName: function(/*String*/ className) {
 			return className.replace('.', '/');
 		},
 		/**
 		 * @return true if the String is a valid descriptor;
 		 */
-		isDescriptor: function(descriptor) {
+		/*boolean*/ isDescriptor: function(/*String*/ descriptor) {
 			return descriptor.length == 1 || (descriptor.startsWith("L") && descriptor.endsWith(";"));
 		},
 		/**
 		 * Converts a class name to a descriptor.
 		 * @return Linternal/class/name;
 		 */
-		toDescriptor: function(className) {
+		/*String*/ toDescriptor: function(/*String*/ className) {
 			return this.isDescriptor(className) ? className : "L" + this.toInternalClassName(className) + ";";
 		},
 		/**
@@ -37,7 +37,7 @@ var ASMHelper = (function() {
 		 * Converts the types into descriptors as needed
 		 * @return (LparamType;)LreturnType;
 		 */
-		toMethodDescriptor: function(returnType) {
+		/*String*/ toMethodDescriptor: function(/*String*/ returnType/*, ...*/) {
 			// gather the rest of the arguments as an array, but exclude the first argument
 			var paramTypes = Array.prototype.slice.call(arguments);
 			paramTypes.shift();
@@ -46,13 +46,36 @@ var ASMHelper = (function() {
 			return "(" + paramDescriptors + ")" + this.toDescriptor(returnType);
 		},
 		/**
-		 * @return The method of the class that has both a matching {@code methodName} and {@code methodDesc}.
-		 * If no matching method is found, returns {@code null}.
+		 * @return Whether or not the instruction is a label or a line number.
 		 */
-		findMethodNodeOfClass: function(classNode, methodName, methodDesc) {
-			return classNode.methods.find(function(method) {
-				return method.name == methodName && (!methodDesc || method.desc == methodDesc)
-			});
+		/*boolean*/ isLabelOrLineNumber: function(/*AbstractInsnNode*/ insn)
+		{
+			return insn.getType() == AbstractInsnNode.LABEL || insn.getType() == AbstractInsnNode.LINE;
+		},
+		/**
+		 * @return The first instruction for which {@code predicate(instruction) == true} (could be {@code firstInsnToCheck}).
+		 * If {@code reverseDirection} is {@code true}, instructions will be traversed backwards (using getPrevious()).
+		 * If a matching instruction cannot be found, returns {@code null}.
+		 */
+		/*AbstractInsnNode*/ getOrFindInstructionWithPredicate: function(/*AbstractInsnNode*/ firstInsnToCheck, /*function*/ predicate, /*boolean*/ reverseDirection)
+		{
+			for (var instruction = firstInsnToCheck; instruction != null; instruction = reverseDirection ? instruction.getPrevious() : instruction.getNext())
+			{
+				if (predicate(instruction))
+					return instruction;
+			}
+			return null;
+		},
+		/**
+		 * @return The first instruction for which {@link AbstractInsnNode#getType()} == {@code type} (could be {@code firstInsnToCheck}).
+		 * If {@code reverseDirection} is {@code true}, instructions will be traversed backwards (using getPrevious()).
+		 * If a matching instruction cannot be found, returns {@code null}.
+		 */
+		/*AbstractInsnNode*/ getOrFindInstructionOfType: function(/*AbstractInsnNode*/ firstInsnToCheck, /*int*/ type, /*boolean*/ reverseDirection)
+		{
+			return this.getOrFindInstructionWithPredicate(firstInsnToCheck, function(instruction) {
+				return instruction.getType() == type;
+			}, reverseDirection);
 		},
 		/**
 		 * @return The first instruction for which {@link AbstractInsnNode#getOpcode()} == {@code opcode} (could be {@code firstInsnToCheck}).
@@ -61,12 +84,63 @@ var ASMHelper = (function() {
 		 */
 		/*AbstractInsnNode*/ getOrFindInstructionWithOpcode: function(/*AbstractInsnNode*/ firstInsnToCheck, /*int*/ opcode, /*boolean*/ reverseDirection)
 		{
-			for (var instruction = firstInsnToCheck; instruction != null; instruction = reverseDirection ? instruction.getPrevious() : instruction.getNext())
-			{
-				if (instruction.getOpcode() == opcode)
-					return instruction;
-			}
-			return null;
+			return this.getOrFindInstructionWithPredicate(firstInsnToCheck, function(instruction) {
+				return instruction.getOpcode() == opcode;
+			}, reverseDirection);
+		},
+		/**
+		 * @return The first instruction for which {@link #isLabelOrLineNumber} == {@code true} (could be {@code firstInsnToCheck}).
+		 * If a matching instruction cannot be found, returns {@code null}.
+		 */
+		/*AbstractInsnNode*/ getOrFindLabelOrLineNumber: function(/*AbstractInsnNode*/ firstInsnToCheck, /*boolean*/ reverseDirection)
+		{
+			return this.getOrFindInstructionWithPredicate(firstInsnToCheck, function(instruction) {
+				return this.isLabelOrLineNumber(instruction);
+			}.bind(this), reverseDirection);
+		},
+		/**
+		 * @return The first instruction for which {@link #isLabelOrLineNumber} == {@code false} (could be {@code firstInsnToCheck}).
+		 * If {@code reverseDirection} is {@code true}, instructions will be traversed backwards (using getPrevious()).
+		 * If a matching instruction cannot be found, returns {@code null}.
+		 */
+		/*AbstractInsnNode*/ getOrFindInstruction: function(/*AbstractInsnNode*/ firstInsnToCheck, /*boolean*/ reverseDirection)
+		{
+			return this.getOrFindInstructionWithPredicate(firstInsnToCheck, function(instruction) {
+				return !this.isLabelOrLineNumber(instruction);
+			}.bind(this), reverseDirection);
+		},
+		/**
+		 * @return The first instruction of the {@code method} for which {@link #isLabelOrLineNumber} == {@code false}.
+		 * If a matching instruction cannot be found, returns {@code null}.
+		 */
+		/*AbstractInsnNode*/ findFirstInstruction: function(/*MethodNode*/ method)
+		{
+			return this.getOrFindInstruction(method.instructions.getFirst());
+		},
+		/**
+		 * @return The first instruction of the {@code method} for which {@link AbstractInsnNode#getOpcode()} == {@code opcode}.
+		 * If a matching instruction cannot be found, returns {@code null}.
+		 */
+		/*AbstractInsnNode*/ findFirstInstructionWithOpcode: function(/*MethodNode*/ method, /*int*/ opcode)
+		{
+			return ASMAPI.findFirstInstruction(method, opcode);
+		},
+		/**
+		 * @return The last instruction of the {@code method} for which {@link AbstractInsnNode#getOpcode()} == {@code opcode}.
+		 * If a matching instruction cannot be found, returns {@code null}.
+		 */
+		/*AbstractInsnNode*/ findLastInstructionWithOpcode: function(/*MethodNode*/ method, /*int*/ opcode)
+		{
+			return this.getOrFindInstructionWithOpcode(method.instructions.getLast(), opcode, true);
+		},
+		/**
+		 * @return The next instruction after {@code instruction} for which {@link #isLabelOrLineNumber} == {@code false}
+		 * (excluding {@code instruction}).
+		 * If a matching instruction cannot be found, returns {@code null}.
+		 */
+		/*AbstractInsnNode*/ findNextInstruction: function(/*AbstractInsnNode*/ instruction)
+		{
+			return this.getOrFindInstruction(instruction.getNext());
 		},
 		/**
 		 * @return The next instruction after {@code instruction} for which {@link AbstractInsnNode#getOpcode()} == {@code opcode}
@@ -76,6 +150,71 @@ var ASMHelper = (function() {
 		/*AbstractInsnNode*/ findNextInstructionWithOpcode: function(/*AbstractInsnNode*/ instruction, /*int*/ opcode)
 		{
 			return this.getOrFindInstructionWithOpcode(instruction.getNext(), opcode);
+		},
+		/**
+		 * @return The next instruction after {@code instruction} for which {@link #isLabelOrLineNumber} == {@code true}
+		 * (excluding {@code instruction}).
+		 * If a matching instruction cannot be found, returns {@code null}.
+		 */
+		/*AbstractInsnNode*/ findNextLabelOrLineNumber: function(/*AbstractInsnNode*/ instruction)
+		{
+			return this.getOrFindLabelOrLineNumber(instruction.getNext());
+		},
+		/**
+		 * @return The previous instruction before {@code instruction} for which {@link #isLabelOrLineNumber} == {@code false}
+		 * (excluding {@code instruction}).
+		 * If a matching instruction cannot be found, returns {@code null}.
+		 */
+		/*AbstractInsnNode*/ findPreviousInstruction: function(/*AbstractInsnNode*/ instruction)
+		{
+			return this.getOrFindInstruction(instruction.getPrevious(), true);
+		},
+		/**
+		 * @return The previous instruction before {@code instruction} for which {@link AbstractInsnNode#getOpcode()} == {@code opcode}
+		 * (excluding {@code instruction}).
+		 * If a matching instruction cannot be found, returns {@code null}.
+		 */
+		/*AbstractInsnNode*/ findPreviousInstructionWithOpcode: function(/*AbstractInsnNode*/ instruction, /*int*/ opcode)
+		{
+			return this.getOrFindInstructionWithOpcode(instruction.getPrevious(), opcode, true);
+		},
+		/**
+		 * @return The previous instruction before {@code instruction} for which {@link #isLabelOrLineNumber} == {@code true}
+		 * (excluding {@code instruction}).
+		 * If a matching instruction cannot be found, returns {@code null}.
+		 */
+		/*AbstractInsnNode*/ findPreviousLabelOrLineNumber: function(/*AbstractInsnNode*/ instruction)
+		{
+			return this.getOrFindLabelOrLineNumber(instruction.getPrevious(), true);
+		},
+		/**
+		 * @return The method of the class that has both a matching {@code methodName} and {@code methodDesc}.
+		 * If no matching method is found, returns {@code null}.
+		 */
+		/*MethodNode*/ findMethodNodeOfClass: function(/*ClassNode*/ classNode, /*String*/ methodName, /*String*/ methodDesc) {
+			return classNode.methods.find(function(method) {
+				return method.name == methodName && (!methodDesc || method.desc == methodDesc)
+			});
+		},
+		/**
+		 * Adding instructions to abstract methods will cause a {@link java.lang.ClassFormatError}
+		 * @return Whether or not the {@code MethodNode} is abstract
+		 */
+		/*boolean*/ isMethodAbstract: function(/*MethodNode*/ method)
+		{
+			return (method.access & Opcodes.ACC_ABSTRACT) != 0;
+		},
+		/**
+		 * Useful for defining the end label for ASM-inserted local variables.
+		 *
+		 * @return The last label of the method (usually after the RETURN instruction).
+		 * If no matching {@link LabelNode} is found, returns {@code null}.
+		 */
+		/*LabelNode*/ findEndLabel: function(/*MethodNode*/ method)
+		{
+			return this.getOrFindInstructionWithPredicate(method.getLast(), function(instruction) {
+				return instruction instanceof LabelNode;
+			}, true)
 		},
 		/**
 		 * Remove instructions from {@code insnList} starting with {@code startInclusive}
@@ -96,52 +235,53 @@ var ASMHelper = (function() {
 			return numDeleted;
 		},
 		/**
-		 * Clones an instruction list, remapping labels in the process.
+		 * Note: This is an alternative to {@link #removeFromInsnListUntil(InsnList, AbstractInsnNode, AbstractInsnNode) removeFromInsnListUntil} and will achieve a similar result. <br>
+		 * <br>
 		 *
-		 * @return The cloned {@code InsnList}
+		 * Skip instructions from {@code insnList} starting with {@code startInclusive}
+		 * up until reaching {@code endNotInclusive} ({@code endNotInclusive} will not be skipped).
+		 *
+		 * This is achieved by inserting a GOTO instruction before {@code startInclusive} which is branched to a
+		 * LabelNode that is inserted before {@code endNotInclusive}.
 		 */
-		cloneInsnList: function(source) {
-			var clone = new InsnList();
-
-			// used to map the old labels to their cloned counterpart
-			var labelMap = {};
-
-			// build the label map
-			var instruction;
-			for (instruction = source.getFirst(); instruction != null; instruction = instruction.getNext())
-			{
-				if (instruction instanceof LabelNode)
-				{
-					labelMap[instruction] = new LabelNode();
-				}
-			}
-
-			for (instruction = source.getFirst(); instruction != null; instruction = instruction.getNext())
-			{
-				clone.add(instruction.clone(labelMap));
-			}
-
-			return clone;
+		/*void*/ skipInstructions(/*InsnList*/ insnList, /*AbstractInsnNode*/ startInclusive, /*AbstractInsnNode*/ endNotInclusive)
+		{
+			var skipLabel = new LabelNode();
+			var gotoInsn = new JumpInsnNode(Opcodes.GOTO, skipLabel);
+			insnList.insertBefore(startInclusive, gotoInsn);
+			insnList.insertBefore(endNotInclusive, skipLabel);
 		},
 		/**
-		 * @return The first instruction of the {@code method} for which {@link AbstractInsnNode#getOpcode()} == {@code opcode}.
-		 * If a matching instruction cannot be found, returns {@code null}.
+		 * Note: Does not move the instruction, but rather gets the instruction a certain
+		 * distance away from {@code start}.<br>
+		 * <br>
+		 *
+		 * <b>Example:</b>
+		 * <pre>
+		 * {@code
+		 * // fifthInsn is pointing to the 5th instruction of insnList
+		 * AbstractInsnNode thirdInsn = ASMHelper.move(fifthInsn, -2);
+		 * AbstractInsnNode eightInsn = ASMHelper.move(fifthInsn, 3);
+		 * }
+		 * </pre>
+		 *
+		 * @param start The instruction to move from
+		 * @param distance The distance to move (can be positive or negative)
+		 * @return The instruction {@code distance} away from the {@code start} instruction
 		 */
-		findFirstInstructionWithOpcode: function(method, opcode)
+		/*AbstractInsnNode*/ move(/*AbstractInsnNode*/ start, /*int*/ distance)
 		{
-			return ASMAPI.findFirstInstruction(method, opcode);
-		},
-		/**
-		 * @return Whether or not the instruction is a label or a line number.
-		 */
-		/*boolean*/ isLabelOrLineNumber: function(/*AbstractInsnNode*/ insn)
-		{
-			return insn.getType() == AbstractInsnNode.LABEL || insn.getType() == AbstractInsnNode.LINE;
+			var movedTo = start;
+			for (int i = 0; i < Math.abs(distance) && movedTo != null; i++)
+			{
+				movedTo = distance > 0 ? movedTo.getNext() : movedTo.getPrevious();
+			}
+			return movedTo;
 		},
 		/**
 		 * Convenience method for accessing {@link InsnComparator#areInsnsEqual}
 		 */
-		instructionsMatch: function(first, second)
+		/*boolean*/ instructionsMatch: function(/*AbstractInsnNode*/ first, /*AbstractInsnNode*/ second)
 		{
 			return this.InsnComparator.areInsnsEqual(first, second);
 		},
@@ -277,6 +417,45 @@ var ASMHelper = (function() {
 				numReplaced++;
 			}
 			return numReplaced;
+		},
+		/**
+		 * Clones an instruction list, remapping labels in the process.
+		 *
+		 * @return The cloned {@code InsnList}
+		 */
+		/*InsnList*/ cloneInsnList: function(/*InsnList*/ source)
+		{
+			var clone = new InsnList();
+
+			// used to map the old labels to their cloned counterpart
+			var labelMap = {};
+
+			// build the label map
+			var instruction;
+			for (instruction = source.getFirst(); instruction != null; instruction = instruction.getNext())
+			{
+				if (instruction instanceof LabelNode)
+				{
+					labelMap[instruction] = new LabelNode();
+				}
+			}
+
+			for (instruction = source.getFirst(); instruction != null; instruction = instruction.getNext())
+			{
+				clone.add(instruction.clone(labelMap));
+			}
+
+			return clone;
+		},
+		/**
+		 * @return The local variable of the method that has both a matching {@code varName} and {@code varDesc}.
+		 * If no matching local variable is found, returns {@code null}.
+		 */
+		/*LocalVariableNode*/ findLocalVariableOfMethod(/*MethodNode*/ method, /*String*/ varName, /*String*/ varDesc)
+		{
+			return classNode.localVariables.find(function(method) {
+				return localVar.name.equals(varName) && localVar.desc.equals(varDesc);
+			});
 		},
 	}
 

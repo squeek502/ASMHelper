@@ -10,23 +10,23 @@ var JankyTest = {
 	},
 	assert: function(value, msg) {
 		if (value) return;
-		throw new Error('assertion failed: ' + msg);
+		throw new Error('assertion failed: ' + msg  + JankyTest.getCaller());
 	},
 	assertEquals: function(expected, actual) {
 		if (expected == actual) return;
-		throw new Error('assertEquals failed: "' + expected + '" != "' + actual + '"');
+		throw new Error('assertEquals failed: "' + expected + '" != "' + actual + '"'  + JankyTest.getCaller());
 	},
 	assertStrictEquals: function(expected, actual) {
 		if (expected === actual) return;
-		throw new Error('assertStrictEquals failed: "' + expected + '" !== "' + actual + '"');
+		throw new Error('assertStrictEquals failed: "' + expected + '" !== "' + actual + '"'  + JankyTest.getCaller());
 	},
 	assertTrue: function(actual) {
 		if (actual) return;
-		throw new Error('assertTrue failed: "' + actual);
+		throw new Error('assertTrue failed: "' + actual  + JankyTest.getCaller());
 	},
 	assertFalse: function(actual) {
 		if (!actual) return;
-		throw new Error('assertFalse failed: "' + actual);
+		throw new Error('assertFalse failed: "' + actual  + JankyTest.getCaller());
 	},
 };
 
