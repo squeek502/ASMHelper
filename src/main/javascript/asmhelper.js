@@ -17,7 +17,8 @@ var ASMHelper = (function() {
 		 * @return internal/class/name
 		 */
 		/*String*/ toInternalClassName: function(/*String*/ className) {
-			return className.replace('.', '/');
+			// use /regex/g to replace all occurrences
+			return className.replace(/\./g, '/');
 		},
 		/**
 		 * @return true if the String is a valid descriptor;
@@ -191,10 +192,14 @@ var ASMHelper = (function() {
 		 * @return The method of the class that has both a matching {@code methodName} and {@code methodDesc}.
 		 * If no matching method is found, returns {@code null}.
 		 */
-		/*MethodNode*/ findMethodNodeOfClass: function(/*ClassNode*/ classNode, /*String*/ methodName, /*String*/ methodDesc) {
-			return classNode.methods.find(function(method) {
-				return method.name == methodName && (!methodDesc || method.desc == methodDesc)
-			});
+		/*MethodNode*/ findMethodNodeOfClass: function(/*ClassNode*/ classNode, /*String*/ methodName, /*String*/ methodDesc)
+		{
+			for each (var method in classNode.methods)
+			{
+				if (method.name == methodName && (!methodDesc || method.desc == methodDesc))
+					return method;
+			}
+			return null;
 		},
 		/**
 		 * Adding instructions to abstract methods will cause a {@link java.lang.ClassFormatError}
@@ -453,9 +458,13 @@ var ASMHelper = (function() {
 		 */
 		/*LocalVariableNode*/ findLocalVariableOfMethod: function(/*MethodNode*/ method, /*String*/ varName, /*String*/ varDesc)
 		{
-			return classNode.localVariables.find(function(method) {
-				return localVar.name.equals(varName) && localVar.desc.equals(varDesc);
-			});
+
+			for each (var localVar in method.localVariables)
+			{
+				if (localVar.name.equals(varName) && localVar.desc.equals(varDesc))
+					return localVar;
+			}
+			return null;
 		},
 	}
 
