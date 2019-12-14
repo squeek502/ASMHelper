@@ -244,7 +244,7 @@ var ASMHelper = (function() {
 		 * This is achieved by inserting a GOTO instruction before {@code startInclusive} which is branched to a
 		 * LabelNode that is inserted before {@code endNotInclusive}.
 		 */
-		/*void*/ skipInstructions(/*InsnList*/ insnList, /*AbstractInsnNode*/ startInclusive, /*AbstractInsnNode*/ endNotInclusive)
+		/*void*/ skipInstructions: function(/*InsnList*/ insnList, /*AbstractInsnNode*/ startInclusive, /*AbstractInsnNode*/ endNotInclusive)
 		{
 			var skipLabel = new LabelNode();
 			var gotoInsn = new JumpInsnNode(Opcodes.GOTO, skipLabel);
@@ -269,10 +269,10 @@ var ASMHelper = (function() {
 		 * @param distance The distance to move (can be positive or negative)
 		 * @return The instruction {@code distance} away from the {@code start} instruction
 		 */
-		/*AbstractInsnNode*/ move(/*AbstractInsnNode*/ start, /*int*/ distance)
+		/*AbstractInsnNode*/ move: function(/*AbstractInsnNode*/ start, /*int*/ distance)
 		{
 			var movedTo = start;
-			for (int i = 0; i < Math.abs(distance) && movedTo != null; i++)
+			for (var i = 0; i < Math.abs(distance) && movedTo != null; i++)
 			{
 				movedTo = distance > 0 ? movedTo.getNext() : movedTo.getPrevious();
 			}
@@ -451,7 +451,7 @@ var ASMHelper = (function() {
 		 * @return The local variable of the method that has both a matching {@code varName} and {@code varDesc}.
 		 * If no matching local variable is found, returns {@code null}.
 		 */
-		/*LocalVariableNode*/ findLocalVariableOfMethod(/*MethodNode*/ method, /*String*/ varName, /*String*/ varDesc)
+		/*LocalVariableNode*/ findLocalVariableOfMethod: function(/*MethodNode*/ method, /*String*/ varName, /*String*/ varDesc)
 		{
 			return classNode.localVariables.find(function(method) {
 				return localVar.name.equals(varName) && localVar.desc.equals(varDesc);
