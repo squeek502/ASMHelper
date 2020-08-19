@@ -1,6 +1,8 @@
 ASMHelper
 =========
 
+**WARNING** The effort to port ASMHelper to the new Javascript system has been blocked by https://github.com/MinecraftForge/CoreMods/issues/26. Some things work, but some things are broken, like `findAndReplace`/`findAndReplaceAll`.
+
 A library of functions to help with ASM transformations in Minecraft mods
 
 With Forge > 1.14, [Forge CoreMods](https://github.com/MinecraftForge/CoreMods) are now implemented in Javascript.
