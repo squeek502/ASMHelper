@@ -13,6 +13,4 @@ var RETURN = Opcodes.RETURN;
 function initializeCoreMod() {
 	ASMAPI.loadFile('../../main/javascript/asmhelper.js');
 	ASMAPI.loadFile('utils/jankytest.js');
-
-
 }
