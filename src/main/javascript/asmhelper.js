@@ -433,7 +433,10 @@ var ASMHelper = (function() {
 			var clone = new InsnList();
 
 			// used to map the old labels to their cloned counterpart
-			var labelMap = {};
+			// LabelNode -> LabelNode
+			//var HashMap = Java.type('java.util.HashMap');
+			//var labelMap = new java.util.HashMap();
+			var labelMap = {}
 
 			// build the label map
 			var instruction;
@@ -441,16 +444,38 @@ var ASMHelper = (function() {
 			{
 				if (instruction instanceof LabelNode)
 				{
-					labelMap[instruction] = new LabelNode();
+					//labelMap[instruction] = new LabelNode();
 				}
 			}
 
 			for (instruction = source.getFirst(); instruction != null; instruction = instruction.getNext())
 			{
+				clone.add(instruction.clone({}));
+			}
+
+			return clone;
+			/*
+			InsnList clone = new InsnList();
+
+			// used to map the old labels to their cloned counterpart
+			Map<LabelNode, LabelNode> labelMap = new HashMap<LabelNode, LabelNode>();
+
+			// build the label map
+			for (AbstractInsnNode instruction = source.getFirst(); instruction != null; instruction = instruction.getNext())
+			{
+				if (instruction instanceof LabelNode)
+				{
+					labelMap.put(((LabelNode) instruction), new LabelNode());
+				}
+			}
+
+			for (AbstractInsnNode instruction = source.getFirst(); instruction != null; instruction = instruction.getNext())
+			{
 				clone.add(instruction.clone(labelMap));
 			}
 
 			return clone;
+			*/
 		},
 		/**
 		 * @return The local variable of the method that has both a matching {@code varName} and {@code varDesc}.
