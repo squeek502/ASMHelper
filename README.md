@@ -8,10 +8,6 @@ This branch is a port of ASMHelper from Java to Javascript in order to make it e
 
 ---
 
-**WARNING** The effort to port ASMHelper to the new Javascript system has been blocked by https://github.com/MinecraftForge/CoreMods/issues/26. Some things work, but some things are broken, like `findAndReplace`/`findAndReplaceAll`.
-
----
-
 To use the Javascript version, put [asmhelper.js](src/main/javascript/asmhelper.js) in your mod's resources directory and load it in your `initializeCoreMods` function like so:
 
 ```js
