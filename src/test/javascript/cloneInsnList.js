@@ -20,12 +20,6 @@ function initializeCoreMod() {
 	ASMAPI.loadFile('../../main/javascript/asmhelper.js');
 	ASMAPI.loadFile('utils/jankytest.js');
 
-	var HashMap = Java.type("java.util.HashMap");
-	var LabelNode = Java.type("org.objectweb.asm.tree.LabelNode");
-	var instruction = new LabelNode();
-	var map = {};
-	instruction.clone(map);
-/*
 	var mv = new MethodNode(ACC_PUBLIC, "<init>", "()V", null, null);
 	mv.visitCode();
 	var l0 = new Label();
@@ -63,5 +57,4 @@ function initializeCoreMod() {
 
 	var cloned = ASMHelper.cloneInsnList(mv.instructions);
 	print(cloned);
-	*/
 }
