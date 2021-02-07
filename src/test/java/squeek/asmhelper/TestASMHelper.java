@@ -103,4 +103,16 @@ public class TestASMHelper
 	{
 		CoreModTestRunner.runJavascriptTest("dontPolluteGlobals.js");
 	}
+
+	@Test
+	void findMethodNodeOfClass()
+	{
+		CoreModTestRunner.runJavascriptTest("findMethodNodeOfClass.js");
+	}
+
+	@Test
+	void cloneInsnList()
+	{
+		CoreModTestRunner.runJavascriptTest("cloneInsnList.js");
+	}
 }
