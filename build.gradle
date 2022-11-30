@@ -3,7 +3,7 @@ buildscript {
 		mavenCentral()
 		maven {
 			name = "forge"
-			url = "http://files.minecraftforge.net/maven"
+			url = "https://maven.minecraftforge.net/maven"
 		}
 		maven {
 			name = "sonatype"
@@ -11,7 +11,7 @@ buildscript {
 		}
 	}
 	dependencies {
-		classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+		classpath 'com.anatawa12.forge:ForgeGradle:1.2-1.0.1+'
 	}
 }
 
@@ -19,7 +19,7 @@ apply plugin: 'java'
 
 group = "squeek.asmhelper"
 
-dependencies.add("testCompile", "junit:junit:4.11")
+dependencies.add("testCompileOnly", "junit:junit:4.11")
 test.testLogging { events "skipped", "failed", "passed" }
 sourceSets.test.java.srcDirs += 'tests'
 test.exclude "**squeek/asmhelper/TestObfHelper.class"
@@ -124,7 +124,7 @@ else
 {
 	apply plugin: 'forge'
 	minecraft {
-		version = "1.7.10-10.13.2.1291"
+		version = "1.7.10-10.13.4.1614-1.7.10"
 	}
 
 	sourceSets.main.java.srcDirs += 'raw'
